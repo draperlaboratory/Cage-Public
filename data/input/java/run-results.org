@@ -1,0 +1,64 @@
+* aprove termination
+** Working
+   AddSecret
+   ArraySorting
+   EvenSecret
+   FastExpBigInt
+   FixedSuppliedSeed
+   Life
+   LogSecret
+   MatrixChainOrder
+   NoOps
+   OddExceptions
+   OddSecret
+   PrimalityTests
+   PrimeLeak
+   PythagTriples
+   SecretRand
+   TestPrint
+   Trees
+   countOnes
+   fibonacci
+   genericSort
+   helloWorld
+   InfLeak
+   largest
+   loginIterative
+   loopAsRecursion
+   RecursiveFib
+   Squaring
+   Sudoku
+
+   
+** Untested
+   AProVE_09
+   AProVE_10
+   Costa_Julia_09
+   Costa_Julia_09-recursive
+   Julia_10_Iterative
+   Julia_10_Recursive
+   loop_iter
+
+** Crashes
+   ArrayListLeak
+   BadHash
+   GenericPathfinding
+   NonTerm
+   account
+   stringCompare
+
+** Runs forever
+   CyclicList
+   GCD
+   InfoFlowTests -- Some of them at least
+   LCM
+   Some of ListTest
+   RodCutting
+   hash
+   hashIteratvie
+   login
+   loginFixed
+   loop
+
+** Doesn't Build
+   FastExpInt

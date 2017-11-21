@@ -1,0 +1,2 @@
+f143_0_find_FieldAccess(x2, java.lang.Object(List(Node(x0, java.lang.Object(x1))))) -> f143_0_find_FieldAccess(x2, java.lang.Object(x1)) [ x2 + -1 * x0 >= 1 ]
+f143_0_find_FieldAccess(x, java.lang.Object(List(Node(x3, java.lang.Object(x4))))) -> f143_0_find_FieldAccess(x, java.lang.Object(x4)) [ x + -1 * x3 <= -1 ]

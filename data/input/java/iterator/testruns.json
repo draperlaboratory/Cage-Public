@@ -1,0 +1,238 @@
+{
+    "jar": "IteratorExample.jar",
+    "runs": [
+        {
+            "id": "iterator w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.iterate(Ljava/util/Iterator;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "iterator wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.iterate(Ljava/util/Iterator;)V",
+                },
+                "expected": {
+                    "timeout": true
+                }
+            },
+        },
+        {
+            "id": "iterator w/ DefaultSummaries",
+            "frontend": {
+                "config": {
+                    "query": "IteratorExample.iterate(Ljava/util/Iterator;)V",
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 3000,
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "INFINITE"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "iterator multiple w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.multipleIterate(Ljava/util/Iterator;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "iterator multiple wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.multipleIterate(Ljava/util/Iterator;)V"
+                },
+                "expected": {
+                    "timeout": true
+                }
+            },
+        },
+        {
+            "id": "iterator multiple w/ Defaultsummaries",
+            "frontend": {
+                "config": {
+                    "query": "IteratorExample.multipleIterate(Ljava/util/Iterator;)V",
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "INFINITE",
+                            "timeout": true
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "1",
+                            "justification": "the default summary assumes the arbitrary sized list we create new List() has size 1, which is very reasonable tbh.",
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "iterator nested w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.nestedIterate(Ljava/util/Iterator;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "n^2",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "n^2"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "iterator nested wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.nestedIterate(Ljava/util/Iterator;)V"
+                },
+                "expected": {
+                    "timeout": true
+                }
+            },
+        },
+        {
+            "id": "iterator nested w/ Defaultsummaries",
+            "frontend": {
+                "config": {
+                    "query": "IteratorExample.nestedIterate(Ljava/util/Iterator;)V",
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 5000,
+                        },
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "INFINITE",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "config": {
+                            "timeout": 4000,
+                        },
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "INFINITE"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

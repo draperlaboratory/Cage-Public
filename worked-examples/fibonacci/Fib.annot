@@ -1,0 +1,20 @@
+{
+    "created": "0.0",
+    "package": "foo.bar",
+    "functions":
+    [
+        {
+            "name": "f10mainLoad",
+            "args": ["A", "B", "C", "D", "E", "F"],
+            "secretArgs": [1],
+            "pure": true,
+            "complexity":             {
+                "size": "0",
+                "upperTime": "y",
+                "lowerTime": "1",
+                "upperSpace": "1",
+                "lowerSpace": "1"
+            }
+        }
+    ]
+}

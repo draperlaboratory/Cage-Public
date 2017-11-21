@@ -1,0 +1,22 @@
+{
+    "id":  "2015-07-09T08:26:42-04:00",
+    "package": "GCD",
+    "variables": [
+        { "name", "computations",
+          "scope" : "protected",
+          "classiness" : "Instance",
+          "type" : "int"}
+    ],
+    "functions": [
+        {"name", "mod",
+         "scope" : "public",
+         "return" : "int",
+         "args" : [ { "varName" : "a",
+                      "varType" : "int"},
+                    { "varName" : "b",
+                      "varType" : "int"}],
+         "pure" : "True",
+         "complexity" : "O(a + b)"
+        }
+    ]
+}

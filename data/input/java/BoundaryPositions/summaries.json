@@ -1,0 +1,139 @@
+{
+    "summaries": [
+        {
+            "class": "java.lang.RuntimeException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "env + this"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.Buffer",
+            "methods": [
+                {
+                    "name": "remaining",
+                    "descriptor": "()I",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        }
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.ByteBuffer",
+            "methods": [
+                {
+                    "name": "get",
+                    "descriptor": "([BII)Ljava/nio/ByteBuffer;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                    ],
+                    "modifies": ["this", "arg0"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.System",
+            "methods": [
+                {
+                    "name": "arraycopy",
+                    "descriptor": "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                    "static": true,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                    ],
+                    "upperSize": [
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.IndexOutOfBoundsException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "env + this"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+    ]
+}

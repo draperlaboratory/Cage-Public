@@ -1,0 +1,22 @@
+## sets environment variables for running program/scripts in the cage github repository
+# source this file
+
+export STAC_HOME=${STAC_HOME:- $HOME/stac}
+#location of local git repository <https://github.com/draperlaboratory/cage>
+export CAGE_HOME=${CAGE_HOME:- $STAC_HOME/cage}
+
+#JAVA
+export JAVA_HOME=${JAVA_HOME:- /usr/lib/jvm/java-8-openjdk-amd64}
+export JRE_LIB_HOME=${JRE_LIB_HOME:- $JAVA_HOME/lib/openjdk/jre/lib}
+export RT_LOC=${RT_LOC:- $JRE_LIB_HOME/rt.jar}
+export JCE_LOC=${JCE_LOC:- JRE_LIB_HOME/jce.jar}
+export JAVA_HEAP_MAX=2G
+
+##JARS
+export SOOT_LOC=${SOOT_LOC:- $STAC_DIR/lib/soot-trunk.jar}
+export JCALLGRAPH_LOC=${JCALLGRAPH:- $STAC_DIR/lib/java-callgraph/target/javacg-0.1-SNAPSHOT-static.jar}
+
+#APROVE
+export APROVE_LOC=${APROVE_LOC:- $STAC_DIR/aprove/dist/lib/aprove.jar}
+export STRAT_LOC=${STRAT_LOC:- $CAGE_DIR/data/input/aprove/current.strategy}
+

@@ -1,0 +1,19 @@
+Password Check Function
+=======================
+
+This is a simple password checking utility that compares the (one line text string) content
+of a file to another string passed as argument to the utility.
+
+The Challenge Program is executed as follows:
+
+    $ java -jar pwcheck.jar <password file> <password>
+    (see ./example/example.sh)
+
+The arguments are as follows:
+
+1. <password file>  Name of file containg a single string (secret password)
+
+2. <password>       Password to be compared with the content of <password file>
+
+The program will output "Accept" if <password> matches the secret password in <password file>.
+The program will output "Reject" if <password> does not match the secret password in <password file>.

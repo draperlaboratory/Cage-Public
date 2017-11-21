@@ -1,0 +1,255 @@
+Instructions for General CAGE Usage
+
+* Installation
+  How to install CAGE on a fresh machine.
+
+  we're going to assume you're on a Cent OS machine, since that's what is being
+  used as the evaluation environment of the STAC program.
+
+** Dependencies
+   From there, install the following yum packages:
+
+   yum-utils emacs.x86_64 vi.x86_64 curl.x86_64 wget.x86_64 git-all.noarch
+   mercurial.x86.64 gmp.x86_64 gmp-devel.x86_64 java-1.8.0-openjdk.devel.x86_64
+   opam
+
+   And the following groups:
+
+   "Development tools"
+
+*** Opam
+    Installing opam requires you to add a new repository to yum:
+    yum-config-manager --add-repo
+    http://download.opensuse.org/repositories/home:ocaml/CentOS_7/home:ocaml.repo
+
+    The first thing to do is set up the version of ocaml you'll be running:
+
+    opam init --comp=4.02.1
+
+**** OCaml Packages
+     You'll want to install the following opam packages using opam install:
+
+     core utop batteries core_extended yojson ocamlgraph
+
+** Installing AProVE
+   You'll need the following jar file to run aprove:
+
+   wget http://aprove.informatik.rwth-aachen.de/downloads/aprove_jbc_complexity.jar
+
+   Alternately, compile the sources using
+
+   ant dist
+
+   In the top-level directory. Following a successful build, the jar
+   file can be found in ./dist/lib/
+
+   Once you have the jar file, you'll need to set up the following environment
+   variables:
+
+*** STRAT_LOC
+    A strategy file used to configure aprove.  An example of such a file
+    resides at cage/data/input/aprove/current.strategy
+
+*** APROVE_LOC
+    Points to the location of the aprove jar file (the one we just wgot) on
+    your system.
+
+*** JAVA_HEAP_MAX
+    Sets the size of the heap in the jvm, which is by default woefully small. I
+    suggest at least 2G.
+
+** Installing Kittel/Koat
+   If opam installed the dependencies correctly, there should be only three
+   steps: getting ocamlbuild into your path, making kittel/koat, and putting the
+   resulting binaries into your path.
+
+*** Configuring path
+    eval `opam config env`
+
+*** Building tools
+    Should be as simple as going to kittle-koat and running make all
+
+*** Placing Binaries into path
+    Copy (or link) the binaries produced by make into your path somewhere. I
+    suggest ~/bin/. Many of the scripts assume that the cp or the link lack the
+    .native extension attached by ocaml make.
+
+** Installing Convenience Scripts
+   Convenience scripts for invoking aprove, koat, etc, are provided in
+   cage/scripts.  Putting these in your path will make invoking the pieces of
+   our tool chain much simpler.  We assume that the scripts are linked to, and
+   that the links lack the .sh extension (e.g. the link to aprove.sh is just
+   aprove).
+
+* Basic Steps
+** Run AProVE against your jar
+*** Building AProVE
+    Currently, you don't.  Just run the aprove jar directly against your jar.
+
+*** Invoking AProVE
+    The following bash script might be useful:
+
+    #!/bin/sh
+    # A simple script for invoking AProVE
+
+    STRAT_LOC=${STRAT_LOC:- $HOME/stac/cage/data/input/aprove/current.strategy}
+    APROVE_LOC=${APROVE_LOC:- $HOME/bin/aprove_jbc_complexity.jar}
+    JAVA_HEAP_MAX=2G
+    if [ -e $STRAT_LOC ]; then
+        if [ -e $APROVE_LOC ]; then
+            java -Xmx$JAVA_HEAP_MAX -jar $APROVE_LOC -m wst $@
+        else
+            echo "Couldn't find aprove.jar.  I expected it to be at $APROVE_LOC".
+        exit 1
+    fi
+    else
+      echo "Couldn't find strategy file.  I expected it to be at $STRAT_LOC"
+    fi
+
+    This is just a replica of the aprove.sh script you were to install earlier.
+    Assuming that the following script is in the user's path as aprove, the
+    invocation looks like:
+
+    aprove foo.jar
+
+*** Capturing Intermediate AProVE Output
+
+    Here's a script we find useful for capturing intermittent output from
+    AProVE.  It's a simple wrapper around KoAT that copies input files to
+    /var/tmp.  AProVE currently cleans up after itself, so this is how we save
+    the input for later inspection.
+
+    #!/bin/bash
+
+    koatBin=/home/jtt3620/stac/kittel-koat/koat.native
+
+    echo "koat $@" >> /var/tmp/koatInvocations
+    echo "cp $1 /var/tmp/"
+    cp $1 /var/tmp/
+    ulimit -t 900 $koatBin $@
+
+*** Interpreting AProVE Output
+
+    The final line of aprove tells us whether or not the program under
+    investigation halts.  NO is for non-termination, MAYBE is for something it
+    can't decide, and otherwise, we get back an O(n) approximation.  For
+    non-terminating programs, there's clearly a denial of service attack.  For
+    polynomial approximations, we must take a closer look at the output using koat.
+
+
+** Finding DoS Attacks
+
+*** Use KoAT to find CPU Attacks
+
+    This is the default mode of operating for KoAT.  Given an ITS, KoAT tells
+    us what the run time complexity of that ITS is as a function of it's input.
+
+**** Building KoAT
+     From the kittel-koat directory, run
+
+     make
+
+**** Invoking KoAT
+
+     ./koat.native foo.koat
+
+**** Interpreting KoAT's output
+
+     KoAT produces a large amount of output, but the most important is the
+     penultimate line, which consists of the following:
+
+     Complexity upper bound <value>
+
+     Value comes in two flavors.  Either it is a ?, in which case the program
+     doesn't terminate and there's trivially a denial of service.
+     Alternatively, a polynomial is returned.  This polynomial describes an
+     upper bound on run-time of the program in terms of the arguments to the
+     entry-function on the ITS that we fed to KoAT.  From here, a human has to
+     map the entry function of the ITS back to JBC, and finally they must
+     determine if the given complexity function falls within the
+     challenge-specified budget.
+
+***** Mapping Polynomial Back to JBC
+      TODO: How do we do this?
+
+***** Determining if Polynomial is Within Budget
+      TODO: How do we do this?
+
+*** Use CAGE to find Memory Attacks
+    
+    AProVE generates two versions of the ITS analyzed by KoAT. One
+    version only gives weights to instructions that perform memory
+    allocation. The result of such an analysis is going to give an
+    upper bound on the memory usage, in the pessimistic assumption
+    that the GC does no work.
+
+** Finding Side Channel Attacks
+
+   Side channel attacks are detected using the CAGE-iflow tool, which
+   can be found in the directory cage/src/interproc_flow
+
+*** Installation
+
+    CAGE-iflow is designed as a plugin to the Soot analysis
+    tool. Building the tool requires a recent version of Soot in the
+    class path, as well as the "json-simple" library for parsing and
+    manipulating json files. We use version 1.1.1.
+
+    Move to the interproc_flow directory and add the paths to the soot
+    and json-simple jars in ant.settings.
+
+    Building the tool should now just be a matter of placing yourself in
+    the interproc_flow directory and typing
+
+    ant dist
+
+    The .jar file is named IFlow.jar
+
+*** Usage
+
+    A java bytecode file can be analyzed by invoking the jar with the
+    appropriate flags.
+
+    An example invocation would be:
+
+    java -jar iflow.jar -process-path /path/to/MyTest.jar -main-class MyTest
+
+    Soot should invoke the iflow plugin on the appropriate target,
+    and print the result of the analysis to the standard output.
+
+    Various flags can be passed to the iflow phase as needed. Passing
+    a flag to the analysis is done using the following form:
+
+    -p wjtp.iflow option-name:option-value
+
+    Various combinations:
+    
+    enabled:true // Enables the phase, true by default
+
+    summaries-file:my_file.json // Gives the path to the user-provided annotation summary file
+
+    entry-method:foo // Specifies the entry method "foo" as the point at which execution starts. WARNING: this may return the wrong method if foo is overloaded!
+
+    handle-exceptions:true // Specifies whether or not to take exceptions into account when computing control flow. Enabled by default. WARNING: disabling this option may make analysis unsound!
+
+    cg-dot:my_file.dot // Generates a dot file containing the call graph as computed by Soot, then exits.
+    
+    sink-file:sink-file.txt // specifies the path to the set of sink methods that are used as reference for finding tainted calls to sink methods in a body. Must be added for the tainted sink transform to run. 
+
+
+*** Generating Annotation Files
+
+    The user-defined summaries are in JSON and can be specified
+    according to the format in ANNOTATIONS.md
+
+
+
+
+*** Determining how Tainted Information Flows to Branches
+    
+
+*** Determining Branches Members Have different complexities
+
+TODO: This hasn't been stitched into the detectBranch code, so right now a
+human has to go visualize the ITS and tell you which conditional influences are
+actually dangerous.

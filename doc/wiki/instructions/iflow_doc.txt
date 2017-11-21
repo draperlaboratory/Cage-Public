@@ -1,0 +1,289 @@
+Main Analysis Classes
+___________________________________________________________________________________________________________________________________________________________________________________________
+Iflow Main
+      - Purpose: To initialize the soot analysis with its options as well as to initialize any other transformers to add to the intermediate representation
+      - Implementation (From Code Comments): The Soot plugin for information flow analysis. Registers an instance of IflowTransformer to
+	 * the wjtp pass, registers an instance of BranchTransformer to the jtp pack, and then sets some options for the soot program and invokes the main method
+
+
+
+IFlow Analysis
+      - Purpose (From Code Comments):   IflowAnalysis carries out the inter-procedural taint analysis. We use the call graph and the entry point to recursively create a stack of
+       methods to be analyzed, filtering out elements using `filter`.
+      
+      - Implementation:
+       - Fields: summaries - contains hand written or generated summaries of taint/runtime for particular methods that are being analyzed by soon.
+       	 	 toAnalyze - contains the list of methods in topological order as to what methods should be analyzed by soot and in which order.
+		 (JGA: I could not find field entryPoint)
+		 entryPoint- gets the entrypoint method for each method that is to be analyzed in a whole program analysis.
+
+       - Methods:
+		doAnalysis		  : takes the methods that are initialized in the topological order and makes a call to "toAnalyze" to carry out analysis and add the result to summaries.
+		initializeToAnalyze	  : takes the callgraph of a particular method and looks to create a worklist of analyzable application methods which is stored in "toAnalyze". These methods are
+					    only the methods that are reachable from the heads of the callgraph and satisfy the filter. 
+		analyzeMethod		  : takes a SootMethod object and calls MethodSummary.summarizeMethod on it if the method has not already been summariezed and adds that result to this.summaries
+		summarizeUnanalysedMethod : takes a SootMethod object and calls MethodSummary.summarizeUnanalysedMethod on it. This defaults to all values tainted.
+		showResults		  : print method that prints the results of the summarizing the methods in the analysis. Additional boolean (printJson) argument can be added if the 
+					    json encoding of the results are required.
+		cutSomeBranch		  : takes the unconditionally tainted tag and adds a value to the conditional that is the "i-th possible valid constant"
+		 
+IflowTransformer
+	- Purpose	: The class acts as a transformer for the entire scene of the analysis and performs operations on the analysis as a whole while soot is looking at the code
+	- Implementation: The internal transform method initializes a series of methods, attributes and objects that are components of the analysis like the IflowAnalysis class. 
+	  - Fields: ifa   - the IFlowAnalysis instance that is passed an instance of the callgraph along with a filter for application methods and the list of entrypoint units for data flow 
+	    	    iopts - the IflowOpts instance that stores all options for a particular iflow analysis runthrough
+		    cg 	  - callgraph object representing the full call hierarchy of a method and all the method calls that they call in the body.
+		    pa	  - the geometric analysis where ***** find out more *****
+		    sum	  - summaries object that stores the values of the summary analysis for each soot method in the program which includes taint, runtime, etc. 
+	  
+
+BranchTransformer
+	- Purpose	: Calls the internalTransform method on each method body of the program. This method takes a look at the blocks that have the tainted flow and are branch statements. The 
+	  	   	  method then looks to set the conditions for the branch unit by switching them in for each unit. 
+	- Implementation: For each unit in the body of the method, this method checks if they are unconditionally tainted branches and changes the condition of the branch to a certain state
+	  		  such that each unit will lead down a certain path on that branch
+
+BranchTransform
+	- Purpose	: Static class that fixes a branch of a program to a certain flow path by setting the variables for the conditional to a certain value. 
+
+	- Implementation: The class contains static factory methods that take a unit and can determine and set the values for variables that are essential to the conditional.
+
+	- Method:
+		getConditionBox		: Return a ValueBox data type of the expression that the brach statement depends on for that particular unit. 
+		getSwitchValues		: Returns the complete list of values that are possible for a switch statement and the default value if possible. 
+		setCondition 		: Set the condition for a branch unit to be a certain value v usually to allow for only one path to be taken in the flow of information. 
+
+LocalFlowAnalysis
+	- Purpose	: This class performs the forward flow analysis of the method that is being analyzed and computes the implicit and explicit flows of information throughout the body of a method.
+	
+	- Implementation: This class implements a ForwardFlowAnalysis class which is used for the traversal of the cfg of the method. it utilizes the local summary to perform its merges and store
+	  		  the information that is necessary for computing the taint and other aspects of the method. 
+			  
+	- Methods: 
+	  	flowThrough		: takes the local summary before the expression that is to be analyzed and puts it into the output summary along with the information computed from the analysis
+					  of the unit that is currently being looked at in the method. 
+		entryInitialFlow	: initalizes the arguments taint as well as the taint of the "this" object in the analysis.
+		merge			: merges 2 local summaries using the LocalSummary merge method. 
+		mergeInto		: merges to reduce erroneous implicit flows due to a join. if there is an implicit flow we look to see if there is a post dominator d for that certain unit and 
+					  remove it if that argument turns out to be a post dominator.
+		copy			: copies a source summary into a destination summary
+		getResult		: 
+
+Utility Classes
+____________________________________________________________________________________________________________________________________________________________________________________________________
+
+ApplicationEdgePredicate
+	- Purpose	: takes an edge and returns whether or not the class that calls this method is an application class.
+
+ApplicationMethodFilter
+	- Purpose	: takes a method and returns whether or not that particular method call is from an application class.
+
+ArgOrRetOrThis
+	- Purpose	: abstract class that declares whether or not a certain method has arguments or is simply without arguments other than the object
+	- Implementation: declares 4 methods, isRet, isArg, isThis, and getPos
+ArgValue
+	- Purpose	: extends the class ArgOrRetOrThis and implements the needed methods to satisfy the requirements of extending the abstract class. 
+	- Implementation: takes an int that represents the index of the argument value that is supposed to be associated with that value and sets that to be the argPos argument
+
+RetValue
+	- Purpose	: represents the abstract return value of a method. 
+	- Implementation: the class extends the abstract type ArgOrRetOrThis and implements all the functions that are necessary for it to identify as a RetValue. The class itself is a factory class
+	  		  which utilizes a static method for instantiation rather than a constructor.
+
+BranchTag
+	- Purpose	: implements the tag class that marks a branch with a certain branch number signifying its state as a branch node in the information flow graph.
+	- Implementation: the class contains one field, branchNo, that stores the branch number that is given to it during the initialization of any branchTag object.
+
+TaintedTag
+	- Purpose	: this class represents a tag that signals the analysis that a particular unit is tagged as tainted in the execution of the program. 
+
+	- Implementation: the class has a method that can identify the type of the tag as a tainted one. 
+
+CallGraphToDot
+	- Purpose	: takes a callgraph generated by soot and manipulates the data to turn the graph into a DOT graph representation
+	- Implementation: the constructor takes 3 arguments: the callgraph, the method filter, and the set of entrypoint methods in the callgraph known as "heads"
+	  		  it then takes a look at every edge in the callgraph and checks if the source method is reachable from the head, if it is an application method,
+			  and lastly if it has not already looked at an edge with the same components previously. If so, it adds the edge between these methods to the DOT graph. 
+			  
+	- Method:
+		drawGraph: takes the graph which is represented in this object and writes it to a file f which is given as an argument to the method. 
+
+IflowOpts
+	- Purpose	: Parses and stores the options that are defined by the user for the IflowTransform analysis pass. 
+	- Implementation: Constructor takes a map of options that are in key-value representation, and store them in various fields for the IFlowOpts instance
+
+JSONEncoder
+	- Purpose	: To take a taint analysis summary and encode the resulting information into a JSON object for printing or some sort of manipulation.
+	- Implementation: Contains static methods that act as factories for taking in summaries and returning a JSON Object.
+	
+	- Methods:
+		summariesToJSON	    : takes a Summaries data type s and parses through the summary, putting each method summary into a map sorted by the declaring class at the time. 
+		classSummaryToJson  : utility method utilized by summariesToJSON to take a set of methods that are mapped to a particular class.
+		modifiesToJSON	    : takes out a modifies summary and returns the "modifies" segment of the ending taint summary for the JSON object
+		taintMapToJSON	    : takes the summary taint object and parses out the taint specific aspects of the summary like unconditional taint, mustTaint, taints, etc. 
+
+JsonExtractor
+	- Purpose	: To take a JSON object that contains a taint summary for some set of methods in a program and extracts the taint information to an actual TaintSummary object. 
+	- Implementation: Take a JSONObject and extract information for each of the particular attributes of the taint analysis: modifies, taint, mustTaint, taintAssoc.
+	
+	- Methods:
+		argFromJson 	: return which particular argument is being affected or mentioned in each part of the taintAnalysis, which is  one of 3 possible values: Arg, Ret, This.
+
+ReadJSON
+	- Purpose	: Read a user-generated summary file for taint analysis on a particular set of classes and methods and generate a Summaries object that can then be used by the IflowAnalysis
+	  		  during its passes over the program for taint analysis as well as runtime complexity analyses.
+	- Implementation: The constructor for this method takes a path p that signifies the path to the json file to be read. The main method then reads that json file and parses out the pertinent
+	  		  information and stores it into the summaries object. 
+
+	- Methods: 
+	  	read			: take the file that is declared as the path to the JSON file and open it to read the contents.
+		getMethods		: get the methods that are being named in the summaries file and produce the taint summary for each method that is named in the summary file. Must do some 
+					  searching  for actual SootMethod object via lookup functions. If the method is decipherable and can be found, add it to the summary along with the 
+				          taint from JSON.
+		getMethodByDesc		: for the cases in which a bytecode method descriptor is used to identify the method in the JSON object, use this method to find the correct method signature from
+				  	  the class.
+	getMethodByNameAndNumber	: for the cases in which the method is described by class, function name, and number of arguments, utilize this method to find the correct signature 
+					  according to soot's lookup methods. 
+		
+MethodSummary
+	- Purpose	: This class serves as the main tool for initiating a taint analysis of a particular method. Initializes the localFlowAnalysis class and invokes on a particular method. If 
+	  		  this is not possible, then the default summary is given to the method.
+	
+	- Implementation: This class contains 2 methods, summarizeMethod, which is the main method that is used for invoking the LocalFlowAnalysis workflow on a particular method. The method takes a 
+	  		  SootMethod and a summaries object and then proceeds to pass the number of arguments, the summaries, and the generated CFG of the method into the LocalFlowAnalysis instance.
+			  If the method is not analyzed by that method but still needs a summary, the summarizeUnanlyzedMethod method generates a default taint analysis summary and uses that for 
+			  methods it does not know about.
+
+Summaries
+	- Purpose	: This class is what stores the information regarding the summaries of each method's runtime and taint analysis. This object is passed throughout the file and stores the bulk
+	  		  of the information in a single map data structure that associates a method with a taint summary
+	
+	- Implementation: This class contains a field, data, that allows for storing the relationships between methods and their taint during runtime. There are various access and manipulation methods
+	  		  to utilize this data type.
+
+	- Methods: 
+	  	put		: simple put method that adds the method and taint summary data to the map of already established relationships
+		get		: get method for finding the taint analysis associated with a certain method.
+		getMainSummary	: gets the summary for the particular main method which has been named as the main method of the program by soot. 
+		entrySet	: outputs the data set in the map to a set data type that can be used for various applications throughout the analysis. 
+
+TaintAssumption
+	- Purpose	: This datatype represents the inital assumption as to which set of arguments are assumed to be tainted or none if there is no arguments that are assumed to be tainted. 
+	
+	- Implementation: The class contains a hypothesis attribute that is stored and cannot be changed after instantiation. 
+
+	- Methods:
+		isPresent	: tells is this instance of taint assumption contains any sort of assumption for argument taint.
+		isEmpty		: checks to see if there are no tainted arguments assumed
+		get		: gets which arguments are tainted if they are and none if none are. 
+		empty		: factory method for instantiating a taintAssumption object with no arguments tainted at the start
+		of		: instantiates a TaintAssumption with the a TaintAssumption value for the arguments that are tainted. 
+		allAssuptions	: outputs the set of assumptions for taint that are associated with arguments in a a set datatype. 
+
+TaintState
+	- Purpose	: This particular data set contains the state of taint of a particular program point and associates that with a set of parameters that are tainted under the same assumption. 
+	
+	- Implementation: The class contains a field condTaint that maps the TaintAssumptions at a beginning of a method's execution and then maps that particular assumption to a set of arguments that
+	  		  are tainted. There are methods that provide access to certain parts of the dataset. The main feature of this dataset is that it can merge 2 sets of tainted variables for the
+			  same initial assumption. 
+
+	- Methods:
+		get		: gets the variables that are tainted under the assumption given, if there is no record for that assumption return a new empty set of arguments and save that assumption
+	   getUnconditionalTaint: returns all variables that are tainted under the empty assumption. 
+	     getConditionalTaint: gets the taint for a taint assumption of a particular ArgOrRetOrThis value.
+	   	accept		: takes a visitor which visits every node in the full set of argument-assumption relationships. 
+		merge		: takes 2 "in" taintstate arguments and merges them, the resulting value is put into the 3rth
+		copyFrom	: takes a taintState and copies each of the values from the map of the other state and recycles any previous values that were there.
+		add		: adds the arguments or values that are tainted for a certain assumptions to the full map of assumption-argument relationships.
+		addAll		: adds a set of arguments that are tainted with a particular assumption to the map for that key.
+		isEmpty		: takes a taintassumption and checks to see if the map contains any variables that are associated with that particular instance. 
+		put		: puts a set of taints into the map for a certain assumption argument
+		
+TaintStateVisitor
+	- Purpose	: Interface that defines a visitor method that visits a TaintAssumption-tainted argument relationship from a TaintState
+
+TaintSummary
+	- Purpose	: This class represents the summary of the taint analysis for one particular method. 
+	
+	- Implementation: The class contains a TaintState which records the change in taint given a certain assumption as well as a set of ArgOrRetOrThis that keeps track of all things that are 
+	  		  modified. The last field contains a set of branches that are tainted with regards to a certain initial assumption which are stored in a TaintState object. 
+
+	- Methods:
+		getModified	: returns the full set of modified arguments that were recorded during the analysis of a particular method. 
+		setModified	: sets the modified variable to the set of arguments passed in to the function
+		addModified	: adds a modified value to the set of modified arguments that are recorded during the call of the method. 
+		applySummary	: creates the set of modified arguments that are tainted during one run of a method by adding together the conditional and unconditional taint values
+		merge		: merges the taintSummaries of what is most likely to be 2 different paths of a certain method and combines the taint analysis with a join. The result is then put into
+				  a new taint summary.
+	showBranchStringAndHash : prints out the value for a certain statement in the method and prints out its hash value. 
+	     uncondTaintToString: prints out the unconditionally tainted branches and prints them out. utilizes the show branch method.
+	     	setTaint	: sets the taint value for a certain assumption 
+		addTaint	: adds a particular arg value to the set of taint for a particular assumption. 
+		copyFrom	: copies the taint information from another taint summary object. 
+	  
+ThisValue
+	- Purpose	: This class represents the "this" value of the object that is being referenced in a method. It also extends ArgOrRetOrThis so that the value can be identified as the "this" 
+	  		  value. 
+
+	- Implementation: ThisValue contains a field that is used for instantiation of the ThisValue class. It utilizes the .v() method to return instances of the class for use in the program. The
+	  		  class also implements the methods that are declared in the abstract ArgOrRetOrThis to make sure that the object is identifiable. 
+
+UnitFlowSwitch
+	- Purpose	: This class contains the definition for a large set of possible statements that can be made during a particular method's local analysis. This class takes one statement and 
+	  		  looks to see how the possible taint may be changed as a result of executing that one statement. There are cases of the switch class that apply to almost all of the possible
+			  instructions in the instruction set thus each line can be analyzed.
+
+	- Implementation: the class implements the interface called StmtSwitch which is used to define many of the methods that are necessary to traverse each unit of the body of the method. 
+	  		  For each type of instruction, there is a straightforward way to determine which possible statements are going to be. This is both based on the summaries that are generated. 
+			  
+	- Methods:
+		caseBreakpointStmt	: Throws a simple exception that tells the user that this operation should not be possible for a jimple interpretation. 
+		caseInvokeStmt		: takes the set of all possible assumptions and updates the taint information in the event that the invoke statement is called. 
+		caseAssignStmt		: takes an assign statement and tries to update the taint for an assign statement for a variable. Can include an assign with an invoke on one side. Also updates
+					  taint based on the output of the variables and what variables are modified in this line. 
+		caseIdentityStmt	: can handle the assignment of something to itself whether the right value of the identity expression is a parameter or even if the right 
+					  value is a reference to the "this" variable. 
+		caseEnterMonitorStmt	: prints a warning that the expression is one of a monitoring statement.
+		caseExitMonitorStmt	: prints a warning that the monitored code is being exited. 
+		caseGotoStmt		: do nothing as there is no conditionals to this statement and nothing in the program is affected.
+		caseIfStmt		: updates the taint based on whether or not the local summary says whether or not the conditional statement is a tainted one. If it is, then an implicit taint
+					  is added to this particular statement. 
+		caseLookupSwitchStmt	: **************8
+		caseNopStmt		: do nothing
+		caseRetStmt		: these should not happen in jimple so do nothing as well because they should be optimized out. 
+		caseReturnStmt		: for each assumption, checks if the value of the return statement is tainted and adds that taint to the summary. Also checks to see if there is a taint 
+					  associated with a return of an invoke statement. 
+		caseReturnVoidStmt	: do nothing 
+		caseTableSwitchStmt	: updates the information of taint on the normal summary if the keys are tainted based on a key value. 
+		caseThrowStmt		: Do nothing for now as this is not supported currently.
+		defaultCase		: throw a exception that the instruction is not supported. 
+		
+
+LocalSummary
+	- Purpose	: The local summary class is a TaintSummary for a single method with some extra information that is particularly important for propagating information to the other 
+	  		  local variables
+
+	- Implementation: The local summary extends the TaintSummary class and adds a set of fields that are particularly useful for analysis of a method. numArgs is the number of arguments for the 
+	  		  method, argAlias maps arguments to the locals in the function that are referencing it,  taintedLocals refers to the local variables that are tainted under the assumption
+			  of taint at the beginning of the method, and finally, the taintedBranches field is the one that represents the set of branches that are tainted based on the data which flows 
+			  through it and affects the control. 
+
+	- Methods:
+		merge		: merges the values of 2 localSummaries which is the join of 2 branches meeting again at the same code block. 
+		removeBranches	: removes branches that are post-dominated by a certain argument which is put in. utilizes a visitor method which removes the branch if argument node
+				  has been post-dominated. 
+		getLocals	: get the set of locals that are contained in a certain Value data type. 
+		isTainted	: determines if a value is tainted by looking at if any of the variables associated are tainted given the current information available about the method. 
+		addTaint	: adds the fact that value is tainted by the current hypothesis. add all args which are tainted to the tainted set and add all locals associated with the taint to 
+				  the set of tainted locals.
+		addModified	: add the fact that the argument modified is being modified in the current state. which means that any argument that can reach that value in the method is currently 
+				  modified. 
+		hasImplicitTaint: checks to see if there is any implicit taint at the current state of the method analysis. 
+		addCall		: updates taint information in event of an invoke expression which already has a summary. The summary determines which vars are tainted after the call, which includes
+				  the variables pointed to by the method as well as the implicit flow that is recorded by any branches. 
+		addImplicitTaint: adds the stmt in that particular method to the set of locally tainted branches as well as the globally arranged tainted branches. If the assumption is empty, add a 
+				  tainted tag to the branch to still record the taintedness. 
+		
+
+		
+		

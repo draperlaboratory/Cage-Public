@@ -1,0 +1,39 @@
+{
+    "jar": "FixedSuppliedSeed.jar",
+    "runs": [
+        {
+            "id": "FixedSuppliedSeed",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "FixedSuppliedSeed.nFlips(I)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 6500
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

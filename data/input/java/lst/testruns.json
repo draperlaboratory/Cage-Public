@@ -1,0 +1,51 @@
+{
+    "jar": "MyList.jar",
+    "runs": [
+        {
+            "id": "lst /w Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "timeout": 0
+                },
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        },        
+        {
+            "id": "lst w/ default Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                },
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "INFINITE",
+                            "justification": "the default summaries are not strong enough to prove correct complexity",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

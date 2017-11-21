@@ -1,0 +1,11 @@
+(VAR x x1 x2 x3)
+
+(RULES
+
+ f(x, Node(x, x1), l , x3) -> lookup(x, l)
+ f(x, Node(x0, x1), l, x3) -> f(x, x1, l, s(x3))
+
+ lookup(x, Node(x, x1)) -> true
+ lookup(x, Node(x0, x1)) -> lookup(x, x1)
+
+)

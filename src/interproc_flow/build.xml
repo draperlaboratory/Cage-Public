@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<?eclipse.ant.import?>
+<project basedir="." default="build" name="interproc-flow">
+	<!-- <property file="ant.settings"/> -->
+	<property environment="env"/>
+	<property name="ECLIPSE_HOME" value="../../../../../../tools/installed/eclipse/"/>
+	<property name="debuglevel" value="source,lines,vars"/>
+	<property name="target" value="1.8"/>
+	<property name="source" value="1.8"/>
+	<property name="cage" value="../.."/>
+	<property name="tools" value="${cage}/tools"/>
+	<property name="soot_loc" value="${tools}/soot-trunk.jar" />
+	<property name="json-simple_loc" value="${tools}/json-simple-1.1.jar" />
+	<path id="interproc-flow.classpath">
+		<pathelement location="bin"/>
+		<pathelement location="${soot_loc}"/>
+		<pathelement location="${json-simple_loc}"/>
+	</path>
+	<target name="init">
+		<mkdir dir="bin"/>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.launch"/>
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="bin"/>
+		<delete file="IFlow.jar"/>
+		<delete file="apihtml"/>
+	</target>
+	<target depends="clean" name="cleanall"/>
+	<target depends="build-subprojects,build-project" name="build"/>
+	<target name="build-subprojects"/>
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}"/>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src"/>
+			<classpath refid="interproc-flow.classpath"/>
+		</javac>
+	</target>
+	<target name="doc">
+		<echo message="${ant.project.name}: ${ant.file}"/>
+		<javadoc destdir="apihtml" author="Draper" access="private">
+			  <fileset dir="src">
+			  	<include name="**/*.java" />
+			  </fileset>
+			  <classpath refid="interproc-flow.classpath"/>
+			  <link href="https://www.sable.mcgill.ca/soot/doc/" />
+			  <link href="http://docs.oracle.com/javase/7/docs/api/" />
+		    <doctitle>interproc_flow</doctitle>
+		    <bottom>Charles Stark Draper Laboratory. All Rights Reserved.</bottom>
+		  </javadoc>
+	</target>
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+	<target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+		<copy todir="${ant.library.dir}">
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+		</copy>
+		<unzip dest="${ant.library.dir}">
+			<patternset includes="jdtCompilerAdapter.jar"/>
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+		</unzip>
+	</target>
+	<target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+		<antcall target="build"/>
+	</target>
+
+	<target name="dist" depends="build">
+		<jar jarfile="./IFlow.jar" basedir="bin" includes="**" update="false">
+			<fileset dir="bin" includes="**"/>
+			<manifest>
+				<attribute name="Main-Class" value="com.draper.cage.taint.IflowMain"/>
+				<attribute name="Class-Path"
+                     value="${soot_loc} ${json-simple_loc}"/>
+			</manifest>
+		</jar>
+	</target>
+	<target name="TestJSON">
+		<java classname="ReadJSON" failonerror="true" fork="yes">
+			<arg line="../../doc/instructions/example-summary.json"/>
+			<classpath refid="interproc-flow.classpath"/>
+		</java>
+	</target>
+</project>

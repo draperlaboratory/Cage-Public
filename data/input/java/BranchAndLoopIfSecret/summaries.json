@@ -1,0 +1,18 @@
+{
+    "summaries": [
+        {
+            "class": "BranchAndLoopIfSecret",
+            "methods": [
+                {
+                    "name": "getSecret",
+                    "argCount": 0,
+                    "static": true,
+                    "modifies": [],
+                    "taint": {
+                        "mustTaint": ["ret"]
+                    }
+                }
+            ]
+        }
+    ]
+}

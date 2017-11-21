@@ -1,0 +1,12 @@
+(VAR x0)
+(PAIRS
+  F393_0_APPEND_FIELDACCESS(java.lang.Object(List(Node(java.lang.Object(x0))))) -> F393_0_APPEND_FIELDACCESS(java.lang.Object(x0))
+)
+(RULES
+)
+(Q
+)
+(EDGES
+    1 -> 1
+)
+(MINIMAL)

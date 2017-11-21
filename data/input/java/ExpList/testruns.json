@@ -1,0 +1,70 @@
+{
+    "jar": "ExpList.jar",
+    "runs": [
+        {
+            "id": "ExpList.main",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "avoid_expanding_type_tree": true
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "EXP",
+                        "expected": {
+                            "bound": "EXP"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "EXP",
+                        "expected": {
+                            "bound": "EXP"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ExpList.exp",
+            "enabled": {
+                "value": false,
+                "justification": "https://github.com/draperlaboratory/cage-koat/issues/15"
+            },
+            "frontend": {
+                "config": {
+                    "options": {
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "ExpList.exp(I)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 8000
+                        },
+                        "real": "EXP",
+                        "expected": {
+                            "bound": "EXP"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "EXP",
+                        "expected": {
+                            "bound": "EXP"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

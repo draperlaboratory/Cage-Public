@@ -1,0 +1,611 @@
+{
+    "summaries": [
+        {
+            "class": "java.util.Vector",
+            "methods": [
+                {
+                    "name": "removeElement",
+                    "descriptor":"(Ljava/lang/Object;)Z",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0",
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "-1 + 1 * this"
+                        },
+                    ],
+                    "modifies": ["this"],
+                    
+                },
+            ],
+        },
+        {
+            "class": "java.util.List",
+            "methods": [
+                {
+                    "name": "iterator",
+                    "descriptor": "()Ljava/util/Iterator;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                }
+            ],
+        },
+        {
+            "class": "java.lang.String",
+            "methods": [
+                {
+                    "name": "charAt",
+                    "descriptor": "(I)C",
+                    "static": false,
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Vector",
+            "methods": [
+                {
+                    "name": "elements",
+                    "descriptor": "()Ljava/util/Enumeration;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Enumeration",
+            "methods": [
+                {
+                    "name": "hasMoreElements",
+                    "descriptor": "()Z",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Enumeration",
+            "methods": [
+                {
+                    "name": "nextElement",
+                    "descriptor": "()Ljava/lang/Object;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "-1 + 1*this",
+                        },
+                    ],
+                    "modifies": ["this"],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Iterator",
+            "methods": [
+                {
+                    "name": "hasNext",
+                    "descriptor": "()Z",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": [],
+                },
+                {
+                    "name": "next",
+                    "descriptor": "()Ljava/lang/Object;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "upperSpace": "0",
+                        "lowerSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "-1 + 1 * this"
+                        },
+                    ],
+                    "modifies": ["this"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.RuntimeException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.Buffer",
+            "methods": [
+                {
+                    "name": "remaining",
+                    "descriptor": "()I",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        }
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.ByteBuffer",
+            "methods": [
+                {
+                    "name": "get",
+                    "descriptor": "([BII)Ljava/nio/ByteBuffer;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                    ],
+                    "modifies": ["this", "arg0"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.System",
+            "methods": [
+                {
+                    "name": "arraycopy",
+                    "descriptor": "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                    "static": true,
+                    "complexity": {
+                        "upperTime": "arg4",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                    ],
+                    "upperSize": [
+                    ],
+                    "modifies": ["arg2"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.IndexOutOfBoundsException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Vector",
+            "methods": [
+                {
+                    "name": "elements",
+                    "descriptor": "()Ljava/util/Enumeration;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.util.Enumeration",
+            "methods": [
+                {
+                    "name": "hasMoreElements",
+                    "descriptor": "()Z",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.util.List",
+            "methods": [
+                {
+                    "name": "iterator",
+                    "descriptor": "()Ljava/util/Iterator;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                }
+            ],
+        },
+        {
+            "class": "java.lang.RuntimeException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.Buffer",
+            "methods": [
+                {
+                    "name": "remaining",
+                    "descriptor": "()I",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        }
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+        {
+            "class": "java.nio.ByteBuffer",
+            "methods": [
+                {
+                    "name": "get",
+                    "descriptor": "([BII)Ljava/nio/ByteBuffer;",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "1 * this + -1 * arg2"
+                        },
+                    ],
+                    "modifies": ["this", "arg0"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.System",
+            "methods": [
+                {
+                    "name": "arraycopy",
+                    "descriptor": "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                    "static": true,
+                    "complexity": {
+                        "upperTime": "arg4",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                    ],
+                    "upperSize": [
+                    ],
+                    "modifies": ["arg2"],
+                },
+            ],
+        },
+        {
+            "class": "java.lang.IndexOutOfBoundsException",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "upperTime": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },
+            ],
+        },
+
+        {
+            "class": "java.io.BufferedReader",
+            "methods": [
+                {
+                    "name": "readLine",
+                    "descriptor": "()Ljava/lang/String;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "upperSpace": "0",
+                        "lowerSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "-1 + 1 * this"
+                        },
+                    ],
+                    "modifies": ["this"],
+                },
+            ],
+        },
+    ]
+}

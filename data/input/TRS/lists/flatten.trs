@@ -1,0 +1,8 @@
+(VAR x xs ys)
+(RULES
+  @([], xs)         -> xs
+  @(::(x, xs), ys) -> ::(x, @(xs, ys))
+
+  flatten([]) -> []
+  flatten(::(x,xs)) -> @(x,flatten(xs))
+)

@@ -1,0 +1,359 @@
+[
+    {
+        "class": "java.io.PrintStream",
+        "functions": [
+            {
+                "name": "println",
+                "descriptor": "(Ljava/lang/String;)V",
+                "args": ["this", "s"]
+            },
+            {
+                "name": "print",
+                "descriptor": "(Ljava/lang/String;)V",
+                "args": ["this", "s"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.FileOutputStream",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/lang/String;)V",
+                "args": ["this", "s"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.OutputStream",
+        "functions": [
+            {
+                "name": "write",
+                "descriptor": "(I)V",
+                "args": ["this", "s"]
+            },
+            {
+                "name": "write",
+                "descriptor": "([B)V",
+                "args": ["this", "s"]
+            },
+            {
+                "name": "write",
+                "descriptor": "([BII)V",
+                "args": ["this", "s", "i", "j"]
+            }
+        ]
+    },
+    {
+        "class": "java.util.Scanner",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/InputStream;)V",
+                "args": ["this", "stream"]
+            },
+            {
+                "name": "nextLine",
+                "descriptor": "()Ljava/lang/String;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.io.InputStreamReader",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/InputStream;)V",
+                "args": ["this", "stream"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.BufferedReader",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/Reader;)V",
+                "args": ["this", "stream"]
+            },
+            {
+                "name": "read",
+                "descriptor": "()I",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.io.Reader",
+        "functions": [
+            {
+                "name": "read",
+                "descriptor": "()I",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.io.BufferedWriter",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/Writer;)V",
+                "args": ["this", "writer"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.PrintWriter",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/Writer;)V",
+                "args": ["this", "writer"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.OutputStreamWriter",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Ljava/io/OutputStream;)V",
+                "args": ["this", "stream"]
+            }
+        ]
+    },
+    {
+        "class": "java.nio.charset.Charset",
+        "functions": [
+            {
+                "name": "defaultCharset",
+                "descriptor": "()Ljava/nio/charset/Charset;",
+                "args": []
+            }
+        ]
+    },
+    {
+        "class": "java.nio.file.Paths",
+        "functions": [
+            {
+                "name": "get",
+                "descriptor": "(Ljava/lang/String;[Ljava/lang/String;)Ljava/nio/file/Path;",
+                "args": ["arg1", "arg2"]
+            }
+        ]
+    },
+    {
+        "class": "java.nio.file.Files",
+        "functions": [
+            {
+                "name": "readAllBytes",
+                "descriptor": "(Ljava/nio/file/Path;)[B",
+                "args": ["arg1"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.lang.AbstractStringBuilder",
+        "functions": [
+            {
+                "name": "append",
+                "descriptor": "(I)Ljava/lang/AbstractStringBuilder;",
+                "args": ["this", "arg1"],
+                "complexity": {
+                    "upperSize": "this + 20",
+                    "lowerSize": "this"
+                }
+            },
+            {
+                "name": "append",
+                "descriptor": "(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder;",
+                "args": ["this", "arg1"],
+                "complexity": {
+                    "upperSize": "this + arg1",
+                    "lowerSize": "this"
+                }
+            },
+            {
+                "name": "<init>",
+                "descriptor": "(I)V",
+                "args": ["this", "arg1"],
+                "complexity": {
+                    "upperSize": "this + 2 * arg1",
+                    "lowerSize": "this + arg1"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.lang.String",
+        "functions": [
+            {
+                "name": "trim",
+                "descriptor": "()Ljava/lang/String;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "this",
+                    "lowerSize": "0"
+                }
+            },
+            {
+                "name": "getBytes",
+                "descriptor": "(Ljava/lang/String;)[B",
+                "args": ["this", "s"],
+                "complexity": {
+                    "upperSize": "2 * this",
+                    "lowerSize": "this"
+                }
+            },
+            {
+                "name": "getBytes",
+                "descriptor": "()[B",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "2 * this",
+                    "lowerSize": "this"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.util.Arrays",
+        "functions": [
+            {
+                "name": "copyOf",
+                "descriptor": "([BI)[B",
+                "args": ["x", "y"],
+                "complexity": {
+                    "upperSize": "x + y",
+                    "lowerSize": "x"
+                }
+            }
+        ]
+    },
+    {
+        "class": "javax.crypto.Cipher",
+        "functions": [
+            {
+                "name": "getInstance",
+                "descriptor": "(Ljava/lang/String;)Ljavax/crypto/Cipher;",
+                "args": ["x"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            },
+            {
+                "name": "init",
+                "descriptor": "(ILjava/security/Key;Ljava/security/SecureRandom;)V",
+                "args": ["this", "x", "y", "z"],
+            },
+            {
+                "name": "init",
+                "descriptor": "(ILjava/security/Key;Ljava/security/spec/AlgorithmParameterSpec;Ljava/security/SecureRandom;)V",
+                "args": ["this", "x", "y", "z", "i"],
+            },
+            {
+                "name": "init",
+                "descriptor": "(ILjava/security/Key;Ljava/security/AlgorithmParameters;Ljava/security/SecureRandom;)V",
+                "args": ["this", "x", "y", "z", "i"],
+            },
+            {
+                "name": "init",
+                "descriptor": "(ILjava/security/Key;Ljava/security/cert/Certificate;)V",
+                "args": ["this", "x", "y", "z"],
+            }
+        ]
+    },
+    {
+        "class": "javax.crypto.KeyGenerator",
+        "functions": [
+            {
+                "name": "getInstance",
+                "descriptor": "(Ljava/lang/String;)Ljavax/crypto/KeyGenerator;",
+                "args": ["x"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            },
+            {
+                "name": "init",
+                "descriptor": "(I)V",
+                "args": ["this", "x"],
+                "complexity": {
+                    "upperSize": "this + x",
+                    "lowerSize": "this"
+                }
+            },
+            {
+                "name": "generateKey",
+                "descriptor": "()Ljavax/crypto/SecretKey;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "this",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "javax.crypto.KeyGeneratorSpi",
+        "functions": [
+            {
+                "name": "engineInit",
+                "descriptor": "(ILjava/security/SecureRandom;)V",
+                "args": ["this", "x"]
+            },
+            {
+                "name": "engineGenerateKey",
+                "descriptor": "()Ljavax/crypto/SecretKey;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "this",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.util.Iterator",
+        "functions": [
+            {
+                "name": "hasNext",
+                "descriptor": "()Z",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "1",
+                    "lowerSize": "0"
+                }
+            },
+            {
+                "name": "next",
+                "descriptor": "()Ljava/lang/Object;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "this",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    }
+]

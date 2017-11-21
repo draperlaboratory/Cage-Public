@@ -1,0 +1,15 @@
+{
+    "summaries" : [{
+    "class": "Foo",
+    "methods": [
+	{
+	    "name": "taints",
+	    "argCount": 1,
+	    "modifies": ["arg0"],
+	    "taint": {
+		"mustTaint": ["arg0"]
+	    }
+	}
+	]
+    }]
+}

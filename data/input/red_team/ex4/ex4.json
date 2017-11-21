@@ -1,0 +1,103 @@
+[
+    {
+        "class": "java.security.AccessController",
+        "functions": [
+            {
+                "name": "doPrivileged",
+                "descriptor": "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;",
+                "args": ["s"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.nio.charset.Charset",
+        "functions": [
+            {
+                "name": "defaultCharset",
+                "descriptor": "()Ljava/nio/charset/Charset;",
+                "args": [],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.lang.Thread",
+        "functions": [
+            {
+                "name": "currentThread",
+                "descriptor": "()Ljava/lang/Thread;",
+                "args": [],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "sun.nio.fs.UnixPath",
+        "functions": [
+            {
+                "name": "<init>",
+                "descriptor": "(Lsun/nio/fs/UnixFileSystem;Ljava/lang/String;)V",
+                "args": ["this", "arg1", "arg2"],
+                "sideEffects": {
+                    "this": {
+                        "upperSize": "1*this + 1*arg1 + 1*arg2",
+                        "lowerSize": "this"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.nio.file.Files",
+        "functions": [
+            {
+                "name": "readAllBytes",
+                "descriptor": "(Ljava/nio/file/Path;)[B",
+                "args": ["arg1"],
+                "complexity": {
+                    "upperSize": "env",
+                    "lowerSize": "0"
+                }
+            }
+        ]
+    },
+    {
+        "class": "java.lang.String",
+        "functions": [
+            {
+                "name": "trim",
+                "descriptor": "()Ljava/lang/String;",
+                "args": ["this"],
+                "complexity": {
+                    "upperSize": "this",
+                    "lowerSize": "0"
+                }
+            },
+            {
+                "name": "getChars",
+                "descriptor": "(II[CI)V",
+                "args": ["this", "arg1", "arg2", "arg3", "arg4"]
+            }
+        ]
+    },
+    {
+        "class": "java.io.PrintStream",
+        "functions": [
+            {
+                "name": "println",
+                "descriptor": "(Ljava/lang/String;)V",
+                "args": ["this", "s"]
+            },
+        ]
+    }
+]

@@ -1,0 +1,6 @@
+(VAR x y)
+(GOAL COMPLEXITY)
+(RULES
+ add(x, 0) -> x
+ add(x, S(y)) -> add(S(x),y)
+)

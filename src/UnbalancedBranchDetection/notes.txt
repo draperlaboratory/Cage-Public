@@ -1,0 +1,80 @@
+Notes
+======
+
+Immediate next steps
+--------------------
+1. Track path
+ * Add a corresponding trace (list of soot.Unit) to
+   each instance of Cost
+ * Update the Flow analysis to work with instances of
+   Cost rather than ints.
+
+
+
+Unbalanced branch computation:
+Implementation Steps (at a high-level)
+-----------------------------------------------------
+
+1. For each unit/Jimple statement/node N in the method body,
+   compute interval/cost range of executing the statements
+   from the entry node E to N.
+   This will be computed as a data (forward) flow analysis
+   in the CFG.
+   The cost interval will be computed for each node in a
+   UnitGraph.
+
+* To reach a fix-point during flow analysis computation
+  for program with loops, the flow analysis will need
+  to keep track of more context than predecessors
+  cost ranges
+
+2. For each branch statement, determine the "merge point"
+   unit/statement (the dominator in the CFG with the shortest
+   path from the branch statement to the dominator)
+   of each branch statement.
+
+3. Flag any branch statement where its merge point's cost
+   interval is too large.
+
+4. Update the analysis so that for each cost in the cost
+   intervals computed, the execution path that corresponds
+   to the cost is recorded in a data structure.
+
+5. May introduce a "color tag" to tag unbalanced branch and
+   display in the Eclipse GUI.
+
+
+
+User stories
+------------
+
+1. Determine which cost ranges are "large":
+
+boolean isLarge(CostRange cr)
+{
+  Cost leastCost = cr.getCheapestPossibleCost();
+  Cost maxCost = cr.getLargestPossibleCost();
+  return hasLargeDiff(maxCost, leastCost);
+}
+
+Cost interface other implementations other than Integer.
+For example, we may need to model results from AproveInvoker
+such as Big-O complexities (e.g. linear, exponential, constant).
+Also, we may have a cost that also keeps tracks of the corresponding
+execution path of the cost.
+
+
+-----
+
+
+public int compareTo(Cost other) {
+		if(other instanceof IntegerCost) {
+			Integer otherValue = ((IntegerCost) other).value;
+			Integer thisValue = this.value;
+			return thisValue.compareTo(otherValue);
+		}
+		else throw new IllegalArgumentException(
+			"other is not an instance of IntegerCost");
+}
+
+

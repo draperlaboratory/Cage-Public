@@ -1,0 +1,4 @@
+put key_1 value_1
+put key_2 value_2
+get key_1
+get key_2

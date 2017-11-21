@@ -1,0 +1,18 @@
+Challenge program is executed as follows:
+
+    $ java -jar /home/challenge_program/encrypt_header.jar send <header file> "<request content>"
+    (see ./example/example.sh)
+
+Application concatenates a plaintext <header file> not accessible by user with user 
+supplied <request content>; from which an encrypted file is generated. 
+The arguments are as follows:
+
+1. The static string `send`.
+
+2. Content of <header file>; typically containing HTTP headers and other parts of the request over
+   which the attacker has little or no control.
+
+3. Additional <request content> string data
+
+The program will output a file named <header file>.enc
+

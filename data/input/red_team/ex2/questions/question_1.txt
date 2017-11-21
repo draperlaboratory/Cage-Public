@@ -1,0 +1,22 @@
+Challenge Program:
+
+	store_key_value.jar
+
+Challenge Question:
+	
+	Given the operational budget, does the Challenge Program contain any algorithmic 
+	complexity vulnerability that would cause the realtime runtime (on reference platform)
+        of the Challenge Program on a single call to exceed 25 seconds?
+
+Additional background for question:
+	
+	None
+
+Operational Budget:
+
+	Maximum size of input			:  100,000 'put' or 'get' commands in a single input file
+	Maximum number of characters per key	:  44
+	Maximum number of characters per value	:  100
+	Number of Buckets for the Hash Function :  65536 
+
+

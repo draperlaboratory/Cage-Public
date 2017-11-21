@@ -1,0 +1,78 @@
+## Template for java makefiles
+
+## Fill in the names of each jar file you intend to construct here.
+## So, if you were making Foo.jar and Bar.jar as your programs, you would have
+## JAR_ROOTS := Foo.jar Bar.Jar
+## AS_JARS :=
+## AS_JBC = $(subst .jar,.jbc,$(AS_JARS))
+
+AS_JBC = $(subst .jar,.jbc,$(AS_JARS))
+AS_INTRS = $(subst .jar,.inttrs,$(AS_JARS))
+TRS_OUTPUT ?= .
+JARSONLY=./JARSONLY
+
+## Here's where I think the javap-jar.sh script lives.
+## If it isn't here, this will need updated.  If you have it in your path,
+## then you can just do
+## JAVAP-JAR=javap-jar.sh
+JAVAP-JAR=../../../../scripts/javap-jar.sh
+APROVESH=aprove
+
+## Debug echos, uncomment to see
+# $(info Roots: $(JAR_ROOTS))
+# $(info Jars: $(AS_JARS))
+# $(info JBC: $(AS_JBC))
+
+## By default, make programs and bytecode
+all: programs bytecode
+
+# Meta-rule to build your jars
+programs: $(AS_JARS)
+
+# Similar to above, for bytecode
+bytecode: $(AS_JBC)
+
+inttrs: $(AS_INTRS)
+
+## Make a class
+%.class : %.java
+	javac -source 1.7 -target 1.7 -g $^
+
+## Convert a jar into a bytecode dump
+%.jbc : %.jar
+	$(JAVAP-JAR) $^ > $@
+
+%.inttrs : %.jar
+	$(APROVESH) -o $(TRS_OUTPUT) $^ > /dev/null 2>&1
+
+## Your cleanup targets
+.PHONY: clean-program clean-output clean-tmps clean
+
+clean-tmps:
+	-rm *\~ > /dev/null 2>&1
+	-rm \#* > /dev/null 2>&1
+
+clean-program:
+ifeq ("$(wildcard $(JARSONLY))","")
+	-rm *.class  > /dev/null 2>&1
+	-rm *.jar    > /dev/null 2>&1
+endif
+
+clean-output:
+	-rm *.jbc    > /dev/null 2>&1
+	-rm *.inttrs > /dev/null 2>&1
+	-rm *.qdp > /dev/null 2>&1
+	-rm *.t2 > /dev/null 2>&1
+	-rm *.dot > /dev/null 2>&1
+	-rm *.ps > /dev/null 2>&1
+	-rm *.eps > /dev/null 2>&1
+	-rm *.koat > /dev/null 2>&1
+
+clean: clean-program clean-output clean-tmps
+
+## Here's where you fill in rules for building each jar.
+## An example is left in commented out.
+
+#SingleEl.jar :  SingleEl.class LinkedList.class List.class
+#	jar -cvfe SingleEl.jar SingleEl $^
+

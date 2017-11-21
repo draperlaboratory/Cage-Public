@@ -1,0 +1,17 @@
+Challenge Program:
+
+	delimsearch_1.jar
+
+Challenge Question:
+	
+	Given the operational budget, does the Challenge Program contain any algorithmic 
+	complexity vulnerability that would cause the realtime runtime (on reference platform)
+        of the Challenge Program on a single call to exceed 10 seconds?
+
+Additional background for question:
+	
+	None
+
+Operational Budget:
+
+	Total size of input text file and delimiter file: 1MB

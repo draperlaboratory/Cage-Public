@@ -1,0 +1,22 @@
+Store Key Value Service Function
+================================
+
+This is a very simple service that provides a command line interface to store and retrieve key value pairs.  In order to be efficient, this service uses a hash function.  Though the number of buckets is configurable via an input parameter, typical usage fixes this value to 65536.
+
+The Challenge Program is executed as follows:
+
+    $ java -jar store_key_value.jar 65536 < <input file>
+    (see ./example/example.sh)
+
+The arguments are as follows:
+
+1.  Number of buckets in the hash function
+
+2. <input file>; contains a list of commands that the program will run in sequence (after which program exits)
+
+The application is launched using the static integer input 65536 (for the number of buckets in the hash function) and an <input file> argument. The application will then run the commands contained in the input file in sequential order and exit.
+
+The following commands are allowed in the input file:
+
+  put <key> <value>             Sets table[<key>] to <value>.
+  get <key>             	Get the value for the specified key.

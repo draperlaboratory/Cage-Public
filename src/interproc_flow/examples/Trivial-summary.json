@@ -1,0 +1,16 @@
+{ "summaries" :
+  [ {
+      "class": "Trivial",
+      "methods": [
+          { "name": "dispatch",
+            "descriptor": "(I)V",
+            "argCount": 2,
+            "args": ["this", "arg0"],
+            "taint" : {
+                "mustTaint": ["arg0"]
+            },
+          }
+      ]
+  }
+  ]
+}

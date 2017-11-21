@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>userguide.html</title>
+
+</head>
+
+<body>
+
+<h1>CAGE User Guide</h1>
+
+<h1>Introduction</h1>
+
+<p>This document describes how to use the software tools of CAGE
+to analyze Java Byte Code (JBC) applications for space and time
+complexity vulnerabilities.</p>
+
+<p>CAGE is a collection of software tools rather than
+a single software application.
+CAGE uses many software tools in its frontend and backend.
+Since this document focuses on how to use CAGE, we only describe tools
+that need to be invoked by the user to find vulnerabilties.</p>
+
+<p>This guide assumes that the reader has installed the backend tools
+that are used by CAGE such as Aprove.
+The CAGE installation guide is file <code>$CAGE/doc/instructions/INSTALL.md</code>.</p>
+
+<p>A workflow for using CAGE to finding vulnerabilities in JBC of
+applications is presented below.
+Since we want to apply CAGE to find vulnerabilities in the
+applications of the DARPA STAC engagement meetings, we show how
+to use CAGE to analyze an example application from the DARPA STAC
+engagement 1 meeting:  blogger.
+Although the steps presented in this guide are for analyzing blogger,
+these steps will show how to analyze arbitrary JBC applications with CAGE.</p>
+
+<h1>Setting environment variables in a template script for running CAGE</h1>
+
+<p>In this user guide, environment variables will be presented as
+quoted names in all capital letters such as <code>CAGE</code>.
+<code>CAGE</code> denotes the root directory of your clone of <a href="https://git-scm.com/">GIT</a> repository
+<code>https://github.com/draperlaboratory/cage</code>, for example.
+A dollar sign right before an environment variable denotes
+the value that was set to the environment variable.</p>
+
+<p>To run CAGE, the user will set values to environment variables in a
+template script: <code>$CAGE/scripts/full_analysis_template.sh</code>.
+Environment variables mentioned below are defined in this script.</p>
+
+<p>A copy of that script should be created for the user's platform
+and for the input application to be analyzed by CAGE.
+That script will run the software tools of CAGE on the input application.</p>
+
+<h1>Aprove Path</h1>
+
+<p>CAGE uses the <a href="https://github.com/aprove-developers/aprove">Aprove</a> software tool to infer runtime bounds
+of methods of the input application.
+Specifically, CAGE depends on branch <code>jbc-complexity</code> of <a href="https://git-scm.com/">GIT</a>
+repository <code>https://github.com/aprove-developers/aprove</code>.
+In the script running the software tools of CAGE, variable
+<code>APROVE_H0ME</code> should be set to the root directory of local clone of
+this GIT repo.</p>
+
+<pre><code>APROVE_H0ME=$HOME/Documents/cage_prj/aprove
+</code></pre>
+
+<h1>Directory structure of Engagement meeting applications</h1>
+
+<p>This section describes the contents and structure of the directories
+Engagement 1 meeting applications.</p>
+
+<p>The path of the root directory containing all of the
+Engagement 1 applications is stored in environment
+variable <code>ENGAGEMENT</code>:</p>
+
+<pre><code>ENGAGEMENT=$CAGE/engagement_1/stac_engagement_1_release_v1.0/Challenge_Programs
+</code></pre>
+
+<p>Each application is in a child directory of <code>ENGAGEMENT</code>.
+The name of the child directory is the name of the application.
+The blogger application is in folder <code>$ENGAGEMENT/blogger</code>.</p>
+
+<pre><code>APP_NAME=blogger
+APP_ROOT=$ENGAGEMENT/$APP_NAME
+</code></pre>
+
+<p>In this case, the name of the application is <code>blogger</code>.
+The application name is denoted <code>APP_NAME</code>.
+After running software tool <code>AproveInvoker</code>,
+<code>$APP_NAME</code> will appear in file <code>$ENGAGEMENT/stats.csv</code>,
+a file that stores statistics about analysis results over the
+engagement applications.
+Variable <code>APP_ROOT</code> stores the path to the application folder.</p>
+
+<p>Each application folder contains the following:</p>
+
+<ol>
+<li><p><code>$APP_ROOT/description.txt</code>:
+Text file describing the application, the application's
+inputs and outputs, and how to run the application.</p></li>
+<li><p><code>$APP_ROOT/questions</code>:
+Directory containing vulnerability questions to answer about
+the application.</p></li>
+<li><p><code>$APP_ROOT/challenge_program</code>:
+Directory storing binaries, scripts, information for running the
+application.</p></li>
+</ol>
+
+<h1>Defining environment variable <code>APP_HOME</code></h1>
+
+<p>The scripts running the engagement applications set environment
+variable <code>APP_HOME</code>.
+Those scripts do not define <code>APP_ROOT</code>.
+However, they set the value of <code>APP_HOME</code> to
+same path as <code>$APP_ROOT/challenge_program</code>.
+<code>APP_HOME</code> is used in those scripts for setting the <code>CLASSPATH</code>
+environment variable.
+We also define <code>APP_HOME</code> to make it easier to copy the value
+of <code>CLASSPATH</code> from those script to our script for running
+CAGE:</p>
+
+<pre><code>APP_HOME=$APP_ROOT/challenge_program
+</code></pre>
+
+<p>We describe how to set the classpath in later in this guide in
+Section
+<a href="#java_classpath_of_input_application">Java CLASSPATH of input application</a>.</p>
+
+<h1>Application jar file of input application</h1>
+
+<p>Variable <code>APP_JAR</code> stores the application jar file of the input application.
+The application jar file of the input application is the jar file containing
+the main class.
+<code>APP_JAR</code> setting for blogger:</p>
+
+<pre><code>$APP_HOME/nanohttpd-javawebserver-2.2.0-SNAPSHOT-jar-with-dependencies.jar
+</code></pre>
+
+<h1>Main class of input application</h1>
+
+<p>Variable <code>MAIN_CLASS</code> stores the the main class of the input
+application.
+The main class is the Java class containing the main method or
+entry method of the input application.
+<code>MAIN_CLASS</code> setting for blogger:</p>
+
+<pre><code>MAIN_CLASS=fi.iki.elonen.JavaWebServer
+</code></pre>
+
+<h2>How CAGE software tools use main class information</h2>
+
+<p>The main class is an optional
+<a href="https://github.com/Sable/soot">Soot</a> argument of CAGE tool <code>AproveInvoker</code>;
+this argument is specified with flag <code>-main-class</code>.
+If this argument is not specified, <code>AproveInvoker</code> tries to guess the
+main class.
+<code>AproveInvoker</code> may guess the wrong the main class.
+This happened for STAC engagement application <code>textcrunchr_1</code>.
+Guessing the wrong main class may decrease the precision of the
+taint analysis performed by <code>AproveInvoker</code>.
+Therefore, we recommend specifying the main class to <code>AproveInvoker</code>.</p>
+
+<p>The main class is required input to CAGE tool <code>InfoLeaks</code>.</p>
+
+<h2>Main class of a STAC engagement application</h2>
+
+<p>Since we want to apply CAGE to find vulnerabilities in the
+applications of the DARPA STAC engagement meetings, we describe how
+to find the main class of these application.</p>
+
+<p>The main class can be determined from the script that runs
+the engagement application.
+In the case of blogger, script <code>$APP_HOME/run.sh</code> runs
+the blogger application.
+It runs the main class of <code>$APP_JAR</code>.
+Blogger's application jar contains a manifest file or a file
+named <code>MANIFEST.mf</code>, which states the main class of the jar file.</p>
+
+<p>Not all engagement application jar files contain a manifest file.
+This is the case for engagement application <code>textcrunchr_1</code>.
+The script running <code>textcrunchr_1</code> is file
+<code>$APP_HOME/bin/textcrunchrhost_1</code>.
+The last command in that script runs the <code>textcrunchr_1</code>
+application jar.
+It specifies that the main class is <code>com.cyberpointllc.stac.host.Main</code>.</p>
+
+<h1>Java CLASSPATH of input application</h1>
+
+<p>Variable <code>APP_LIBS</code> stores the list of directories and jar files
+to use in the input application's <a href="https://docs.oracle.com/javase/tutorial/essential/environment/paths.html">classpath</a>.
+The classpath can be determined from the scripts running
+the engagement application.
+In the case of blogger where no classpath is specified,
+the classpath should be set to just the application jar file,
+<code>$APP_JAR</code>:</p>
+
+<pre><code>APP_LIBS=$APP_JAR
+</code></pre>
+
+<p>In the script running engagement application <code>textcrunchr_1</code>,
+the application's classpath is set to environment variable <code>CLASSPATH</code>.
+The value to set <code>CLASSPATH</code> references variable <code>APP_HOME</code>.
+Since our script running CAGE also sets <code>APP_HOME</code>, for most
+engagement applications, we can set the value of <code>APP_LIBS</code> to
+be the same value set to <code>CLASSPATH</code> in the scripts running
+engagement applications.</p>
+
+<p>Note that after variable <code>APP_LIBS</code> is set to the input application's
+classpath, we define variable <code>LIBS</code>:</p>
+
+<pre><code>LIBS=$APP_LIBS:$JAVA7_HOME/jre/lib/rt.jar:$JAVA7_HOME/jre/lib/jce.jar
+</code></pre>
+
+<p><code>LIBS</code> is the classpath used by <code>AproveInvoker</code>.
+<code>APP_LIBS</code> is the classpath used by <code>InfoLeaks</code>.
+<code>LIBS</code> is set to the current value of <code>APP_LIBS</code> appended with
+the jar files used by the Java Runtime Environment (JRE).
+<code>AproveInvoker</code> uses <a href="https://github.com/Sable/soot">Soot</a>, which needs to know which
+JRE classes to assume.
+Adding JRE jar files to the classpath tells Soot (and hence
+<code>AproveInvoker</code>) the JRE used by the input application.</p>
+
+<h1>Method summaries of input application</h1>
+
+<p>Create a custom summaries file for the input application.
+Copy file <code>$CAGE/data/summaries/summaries.json</code>
+to file <code>$APP_ROOT/summaries.json</code>:</p>
+
+<pre><code>cp $CAGE/data/summaries/summaries.json $APP_ROOT/summaries.json
+</code></pre>
+
+<p>The above command will create the initial version of the
+summaries file for the input application.
+The summaries file is used by <code>AproveInvoker</code>.
+It helps improve the accuracy of the results generated by <code>AproveInvoker</code>.
+The summaries files contain algorithmic time complexity information
+for methods that are difficult for <code>AproveInvoker</code> to analyze.
+This file may be updated by the user as he learns more
+precise runtime bounds of methods of the input application.
+The user can determine more precise runtime bounds by manually
+reading the code of the input application.
+A disassembler is software for reading code of binary files.
+A disassembler is in the CAGE repository:
+<code>$CAGE/tools/jd-gui-1.4.0.jar</code>.</p>
+
+<h1>Timeout for Aprove Invocation</h1>
+
+<p>Variable <code>APROVE_TIMEOUT</code> is a setting that affects the runtime
+performance of  <code>AproveInvoker</code>.
+<code>AproveInvoker</code> calls <code>Aprove</code> on each <em>tainted</em> method of the
+input application.
+Tainted methods are methods that could potentially process user
+input.</p>
+
+<p><code>APROVE_TIMEOUT</code> stores the timeout or maximum number of
+seconds allowed for an invocation of <code>Aprove</code> on a method.
+After the run time of an invocation exceeds <code>APROVE_TIMEOUT</code>,
+that invocation is killed.
+If the invocation is killed for a method, the analysis result
+for the analyzed method is recorded as <code>Killed</code>.</p>
+
+<h1>Maximum number of simultaneous Aprove Invocations</h1>
+
+<p>Each invocation of Aprove is run independently of another.
+Hence, each invocation can be run in parallel.
+We run some invocations in parallel to speed up performance.
+We limit the number of parallel invocations to avoid out of
+memory errors and to avoid thread starvation with the
+<code>APROVE_TIMEOUT</code> specified.
+The maximum number of parallel calls is set to variable
+<code>MAX_PARALLEL_APROVE_CALLS</code>.</p>
+
+<h1>Run Time Complexity Analysis on the input application</h1>
+
+<p>After setting the values specified in the preceding
+sections, you are now able to run <code>AproveInvoker</code> on
+the input application.
+The steps performed in the next section can be performed
+while <code>AproveInvoker</code> is running.
+<code>AproveInvoker</code> may take a while to complete execution
+depending on the size of the input application.</p>
+
+<p>Just execute your custom version of script
+<code>$CAGE/scripts/full_analysis_template.sh</code>
+after performing the steps described
+above to run <code>AproveInvoker</code> on the input application.</p>
+
+<h1>Input sources of input application</h1>
+
+<p>Running cage tool <code>InfoLeaks</code> requires a list of variables
+declared in the JBC of the input application.
+This list of Java variables specifies which variables store
+user input in the input application.
+The variables storing user input should be recorded in a file
+named <code>$APP_ROOT/sources.txt</code>.</p>
+
+<p>Determining this list requires using a disassembler to view
+the code of the application jar file.
+Code of the input application can be read using disassembler
+<code>$CAGE/tools/jd-gui-1.4.0.jar</code>.</p>
+
+<h2>Syntax of sources and sinks</h2>
+
+<p>Sources and sinks are declarations defined in the JBC of the
+input application.
+Declarations are members of Java classes such as fields and
+methods.
+Declarations are specified using Java's
+<a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3">descriptor syntax</a>.
+The descriptor of a member captures the member's type signature
+and fully-qualified name.
+An example descriptor used to specify a source method in engagement
+application <code>textcrunchr_1</code> is below</p>
+
+<pre><code>
+com.cyberpointllc.stac.textcrunchr.InputPathHandler.handleInputPath(Ljava/lang/String;)Ljava/util/List;
+</code></pre>
+
+<p>This descriptor specifies the method named <code>handleInputPath</code> in
+class <code>com.cyberpointllc.stac.textcrunchr.InputPathHandler</code> that
+takes in an instance of <code>java.lang.String</code> as an argument and returns
+an instance of <code>java.util.List</code>.</p>
+
+<p>Formal arguments of a method can also be specified as a source or sink.
+To specify which formal argument of a method, add the suffix
+<code>-&gt;pN</code> right after the method's descriptor, where <code>N</code> is the index
+of the argument.
+For non-static methods, the implicit <code>this</code> argument is considered
+the 0th argument and specified as <code>p0</code>.
+For instance, the <code>this</code> argument of method <code>handleInputPath</code> is
+specified in the code block below.</p>
+
+<pre><code>
+com.cyberpointllc.stac.textcrunchr.InputPathHandler.handleInputPath(Ljava/lang/String;)Ljava/util/List;->p0
+</code></pre>
+
+<p>To specify the <code>java.lang.String</code> argument of method <code>handleInputPath</code>,
+substitute <code>p1</code> for <code>p0</code> in the code block above.</p>
+
+<p>Also, to specify the return value of method <code>handleInputPath</code>,
+substitute <code>exit</code> for <code>p0</code> in the code block above.</p>
+
+<h2>Standalone JOANA GUI application</h2>
+
+<p>The syntax of sources and sinks can also be determined using
+the Standalone JOANA GUI application.
+The JOANA GUI application can be invoked by running jar file
+<code>$CAGE/tools/joana.ui.ifc.wala.console.jar</code>.
+Running this GUI application is <em>not</em> required to run the CAGE tools.
+It is not invoked by any of the CAGE tools.
+This tool is provided only as a reference for better understanding
+of the <a href="http://pp.ipd.kit.edu/projects/joana/">JOANA</a> software tool.
+This tool is described in detail in <a href="http://pp.ipd.kit.edu/uploads/publikationen/tooljoana2013atps.pdf">this paper</a>.</p>
+
+<h3>Source/Sink Syntax in JOANA GUI application</h3>
+
+<p>We briefly list the steps to perform in JOANA GUI application window
+to see examples of the syntax for specifying sources and sinks.</p>
+
+<ol>
+<li>Select button <code>Browse</code> to choose the jar file of the input application.</li>
+<li>Select the entry method (main method of main class) in the drop-down
+box labeled <code>Entry method:</code>.</li>
+<li>Select button <code>Build</code> to build the System Dependence Graph of the
+input application.</li>
+<li>Near the top of the window, select the <code>Annotate</code> tab to see
+the tree listing the Java packages and classes defined in the
+input application.
+Clicking a package node in the tree will expand the node to
+list the classes in the package.
+Clicking a class node will expand the node to list the members
+(e.g. fields and methods) in the class.
+Clicking a method node will expand the node to list formal arguments
+of the method, the exit node of a method, etc.</li>
+<li>Select a declaration that you wish to annotate as a source or sink.
+Clicking buttons <code>Source</code> or <code>Sink</code> will cause that declaration to
+be printed in the console window near the bottom of the GUI window.
+The text in the console window can be highlighted, copied, and
+pasted to a text file.</li>
+</ol>
+
+<h1>Generate an Aprove Results File</h1>
+
+<p>Running <code>AproveInvoker</code> on the input application will generate
+file <code>$APP_ROOT/aprove_results.txt</code>.
+This file contains the list of tainted methods in the input
+application and those methods worst case runtime bounds.
+This file is used for determining which methods are
+potentially vulnerable to time complexity
+(denial of service) attacks.</p>
+
+<h1>Optional Step: Improve Runtime Bounds and Remove False Positives</h1>
+
+<p>The user may modify the runtime bounds listed in
+<code>$APP_ROOT/aprove_results.txt</code> to more precise bounds.
+More precise runtime bounds may be found after examining
+the methods with the disassembler.
+This helps eliminate false positives from the list of
+sinks/potentially vulnerable methods.</p>
+
+<h1>Run Information Flow Control analysis on the input application</h1>
+
+<p><code>InfoLeaks</code> performs info flow control analysis to determine
+which sinks can be potentially influenced by sources/user input.
+To run <code>InfoLeaks</code>, uncomment the command starting
+with <code>java -jar $CAGE/src/InfoLeaks/InfoLeaks.jar</code>.
+The command for invoking <code>InfoLeaks</code> is below:</p>
+
+<pre><code>
+java -jar $CAGE/src/InfoLeaks/InfoLeaks.jar \
+            --appjar $APP_JAR \
+            --appclasspath $APP_LIBS \
+            --jreclasspath $JAVA7_HOME/jre/lib/rt.jar \
+            --mainclass $MAIN_CLASS \
+            --sources $APP_ROOT/sources.txt \
+            --sinks $APP_ROOT/aprove_results.txt \
+            --format dot
+</code></pre>
+
+<p><code>InfoLeaks</code> determines if there is an information flow from
+a source to a sink.
+Each detected flow is called a <em>violation</em>.
+For each violation, <code>InfoLeaks</code> will calculate the
+<em>program chop</em>.
+The program chop is the statements executed in the input
+application's runtime trace when performing the violation;
+this trace is called the violation's runtime trace.</p>
+
+<p>The program chop is calculated using an over-approximate
+static analysis of the input application.
+So there may be some statements in the chop that are not
+actually executed in violation's runtime trace.</p>
+
+<p><code>InfoLeaks</code> will generate a file representing the program chop,
+for each violation found.
+The format of the file is specified with the argument to
+command-line option <code>--format</code>.
+Currently, this option accepts four different values:
+<code>dot</code>, <code>json</code>, <code>trace</code>, and <code>unordered</code>;
+these options specify to generate a <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">DOT</a> file,
+a <a href="http://www.json.org/">JSON</a> file, and a text file respectively.
+Command-line option <code>--format</code> is not a required argument.
+The default value for <code>--format</code> is <code>dot</code>.</p>
+
+<p>Command-line option <code>--format</code> can be specified multiple
+times to generate multiple types of files for a single
+invocation of <code>InfoLeaks</code>.
+Passing arguments <code>--format json --format trace</code> to <code>InfoLeaks</code>
+will cause <code>InfoLeaks</code> to generate both JSON and text files
+representing the violations found, for example.</p>
+
+<h2>TRACE Text file contents</h2>
+
+<p>Passing arguments <code>--format trace</code> to <code>InfoLeaks</code> will also cause
+<code>InfoLeaks</code> to generate a text file.
+The TRACE text file will contain the violation flow trace or the key
+sequence of statements executed that causes the information in
+a source to leak to a sink.
+Each statement is annotated with the following</p>
+
+<ol>
+<li>The method that the statement occurs in.</li>
+<li>The <em>bytecode index</em> of the statement in the owning method.
+The owning method of a statement is the method that contains
+that statement.
+Note that statements are in <a href="http://pp.ipd.kit.edu/projects/joana/">Joana</a>'s
+single static assignment (SSA) form.
+Hence, the bytecode index of a statement may not be the same
+as the line number of the statement in the disassembler or
+in the original source code version of the input program.</li>
+</ol>
+
+<p>The TRACE example below is generated for application blogger
+from when specifying source</p>
+
+<pre><code>fi.iki.elonen.NanoHTTPD$HTTPSession.uri
+</code></pre>
+
+<p>and sink</p>
+
+<pre><code>fi.iki.elonen.URIVerifier.verify(Ljava/lang/String;)Z
+</code></pre>
+
+<p>Trace generated by <code>InfoLeaks</code>:</p>
+
+<pre><code>
+v3 = this.uri | fi.iki.elonen.NanoHTTPD$HTTPSession.getUri()Ljava/lang/String;:1
+return v3 | fi.iki.elonen.NanoHTTPD$HTTPSession.getUri()Ljava/lang/String;:4
+v6 = p1.getUri() | fi.iki.elonen.JavaWebServer.serve(Lfi/iki/elonen/NanoHTTPD$IHTTPSession;)Lfi/iki/elonen/NanoHTTPD$Response;:5
+v9 = v4.canServeUri(v6, #(null)) | fi.iki.elonen.JavaWebServer.serve(Lfi/iki/elonen/NanoHTTPD$IHTTPSession;)Lfi/iki/elonen/NanoHTTPD$Response;:11
+v7 = p1.substring(#(1)) | fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z:2
+v11 = v7.replaceAll(#(/), #(.)) | fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z:9
+v13 = v11.isEmpty() | fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z:14
+if (v13 != #(0)) goto 35 | fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z:17
+v18 = v15.verify(v11) | fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z:28
+</code></pre>
+
+<h2>UNORDERED Text file contents</h2>
+
+<p>Passing arguments <code>--format unordered</code> to <code>InfoLeaks</code> will also
+cause <code>InfoLeaks</code> to generate a text file with statements of a
+violation chop in the same format as described in the previous
+section.
+Using <code>--format unordered</code> may cause statements in the text
+file to be printed out of order.
+That is, the order of the statements in the text file may
+not correspond to the order that the statements would be
+executed if running the input application.
+Using <code>--format unordered</code> may cause <code>InfoLeaks</code> to run
+faster than using <code>--format trace</code>.</p>
+
+<h2>DOT file contents</h2>
+
+<p>The DOT file will contain a subgraph of the function call graph.
+This graph contain the following:</p>
+
+<ol>
+<li>Functions in the program chop representing the violation.</li>
+<li>Functions in the program chop from the entry method of the
+input application to the violation's source.</li>
+</ol>
+
+<h2>JSON file contents</h2>
+
+<p>The JSON file will contain the list of methods called in the
+violation's program chop.
+The order of methods in this list (starting from top to bottom)
+is the approximate order that these methods are called in the
+violation's runtime trace.
+This order cannot be exact because there may conditional
+statements in the program chop that affect the order of
+execution.</p>
+
+<p>For each method listed in the JSON file, the statements
+in the body of the method that are also in the program
+chop are also listed.
+This allows the user to see all of the statements in
+the program chop.</p>
+
+<p>After generating the JSON representation of the violations,
+the user can examine these files to see how the input
+application calls the potentially vulnerable methods listed
+in <code>$APP_ROOT/aprove_results.txt</code>.</p>
+
+<p>An example generated JSON file from <code>InfoLeaks</code> is below.
+The sources and sinks specified for this example are also
+below:</p>
+
+<ol>
+<li><p>Contents of <code>$APP_ROOT/sources.txt</code>:</p>
+
+<p>fi.iki.elonen.NanoHTTPD$HTTPSession.uri</p></li>
+<li><p>Contents of <code>$APP_ROOT/aprove_results.txt</code>:</p>
+
+<p>fi.iki.elonen.URIVerifier.verify(Ljava/lang/String;)Z</p></li>
+<li><p>Contents of JSON file generated:</p></li>
+</ol>
+
+<pre><code>
+{
+  "metadata": 
+  {
+    "numNodes": 201,
+
+    "source": 
+    {
+      "file": "fi\/iki\/elonen\/NanoHTTPD.java",
+      "method": "Lfi\/iki\/elonen\/NanoHTTPD$HTTPSession.uri",
+      "id": 6615,
+      "label": "field uri",
+      "type": "Ljava\/lang\/String",
+      "operation": "compound",
+      "entryMethod": "fi.iki.elonen.NanoHTTPD$HTTPSession.getUri()Ljava\/lang\/String;"
+    },
+
+    "sink": 
+    {
+      "file": "fi\/iki\/elonen\/URIVerifier.java",
+      "method": "fi.iki.elonen.URIVerifier.verify(Ljava\/lang\/String;)Z",
+      "id": 8952,
+      "label": "fi.iki.elonen.URIVerifier.verify(java.lang.String)",
+      "type": null,
+      "operation": "entry",
+      "entryMethod": "fi.iki.elonen.URIVerifier.verify(Ljava\/lang\/String;)Z"
+    }
+  },
+
+  "methods": 
+  [
+    {
+      "file": "fi\/iki\/elonen\/JavaWebServerPlugin.java",
+      "method": "fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava\/lang\/String;Ljava\/io\/File;)Z",
+      "id": 6618,
+      "relevantStatements": 
+      [
+        "v7 = p1.substring(#(1))",
+        "v11 = v7.replaceAll(#(\/), #(.))",
+        "v13 = v11.isEmpty()",
+        "if (v13 != #(0)) goto 35",
+        "v15 = new fi.iki.elonen.URIVerifier",
+        "v15.<init>()",
+        "v18 = v15.verify(v11)",
+        "if (v18 == #(0)) goto 39",
+        "PHI v19 = #(1), #(0)"
+      ]
+    },
+    ...
+  ]
+}
+</code></pre>
+
+<p>The JSON example above shows that the key method in the information
+from source</p>
+
+<pre><code>fi.iki.elonen.NanoHTTPD$HTTPSession.uri
+</code></pre>
+
+<p>to sink</p>
+
+<pre><code>fi.iki.elonen.URIVerifier.verify(Ljava/lang/String;)Z-&gt;p1
+</code></pre>
+
+<p>is</p>
+
+<pre><code>fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z
+</code></pre>
+
+<p>The relevant statements in the JSON output are in <a href="http://pp.ipd.kit.edu/projects/joana/">JOANA</a>'s
+single static assignment (SSA) form.
+Code written in SSA form is difficult to understand.
+An easier-to-read representation is given by
+disassembler <code>$CAGE/tools/jd-gui-1.4.0.jar</code>.
+This disassembler will present a source code view of the
+JBC of the input application.
+Below is the disassembler representation of method
+<code>fi.iki.elonen.JavaWebServerPlugin.canServeUri(Ljava/lang/String;Ljava/io/File;)Z</code>:</p>
+
+<pre><code>
+public boolean canServeUri(String uri, File rootDir)
+{
+  uri = uri.substring(1).replaceAll("/", ".");
+  return (uri.isEmpty()) || (new URIVerifier().verify(uri));
+}
+</code></pre>
+
+<h2>Custom JRE Classpath</h2>
+
+<p>The software library JOANA comes with stubs or models of the
+classes of the Java Runtime Environment (JRE) for versions 1.4
+and 1.5 of Java.
+Command line option <code>--jrestub</code> of <code>InfoLeaks</code> allows specifying
+which stub to use.
+The default stub used by <code>InfoLeaks</code> is Java 1.4.
+Command <code>InfoLeaks.jar --help</code> will print out the usage and
+each command-line options allowed input arguments.</p>
+
+<p>Some input applications use classes from later versions of Java.
+Engagement application <code>snapbuddy_1</code>, for example, uses a class
+from Java 1.6, <code>com.sun.net.httpserver.HttpExchange</code>.
+Hence, neither of the stubs provided with JOANA would be
+sufficient to analyzing <code>snapbuddy_1</code>.
+Command-line option <code>--jreclasspath</code> allows specifying a
+classpath to a custom version of JRE classes.
+The JRE classpath should include jar file <code>rt.jar</code> of a
+Java installation.
+Java 1.7's runtime environment jar file is available at
+<code>$CAGE/tools/jdk1.7.0_79/jre/lib/rt.jar</code>.</p>
+
+<h2>Custom Entry Method</h2>
+
+<p>Command-line option <code>--entrymethod</code> allows specifying a non-main
+method as the entry method of the input application.
+Note that either option <code>--entrymethod</code> or option <code>--mainclass</code>
+can be specified but not both.</p>
+
+<h3>Entry method influences size of program graph generated</h3>
+
+<p>If the only source is a single non-main method, specifying that
+method as the entry method may substantially reduce the size of
+the SDG (program graph) generated, speed up analysis, and improve
+the precision of the flow analysis performed by JOANA.
+JOANA only adds declarations to the SDG that are <em>reachable</em> from
+the entry method.
+An edge in the SDG represents a certain type of relationship
+(e.g direct data dependence) between nodes in the SDG.
+Since the SDG generated may become much smaller, choosing a
+non-main method may also prevent <code>java.lang.OutOfMemoryError</code>
+errors.</p>
+
+<h3>Fixing "Sink not found" errors with a Custom Entry Method</h3>
+
+<p>Specifying a non-main entry method may also cause some
+<code>Sink not found</code> errors to not happen.
+A sink may not be found because JOANA only adds declarations to
+the SDG that are <em>reachable</em> from the entry method.
+JOANA may fail to add edges in the SDG for certain type of
+program dependencies.
+I am not sure which type of dependencies are missed.
+It seems certain function callbacks or function calls from threads
+launched by some classes in Java package <code>com.sun.net.httpserver</code>
+are missed.
+For example, in engagement application <code>snapbuddy_1</code>, sink</p>
+
+<pre><code>com.cyberpointllc.stac.snapservice.SnapContext.getUrlParam(Ljava/lang/String;)Ljava/lang/String;
+</code></pre>
+
+<p>is detected if specifying the following method as the entry method</p>
+
+<pre><code>com.cyberpointllc.stac.webserver.handler.AbstractHttpHandler.handle(Lcom/sun/net/httpserver/HttpExchange;)V
+</code></pre>
+
+<p>Although the actual entry method of <code>snapbuddy_1</code> is method
+<code>com.cyberpointllc.stac.host.Main.main</code>, JOANA does not detect
+the above sink if specifying this main method as the entry method.</p>
+
+<h2>Generation whole application function call graph</h2>
+
+<p>Passing command-line option <code>--callgraph</code> to <code>InfoLeaks</code> will
+cause <code>InfoLeaks</code> to generate a dot file representing the
+function call graph of the entire input application.</p>
+
+</body>
+</html>

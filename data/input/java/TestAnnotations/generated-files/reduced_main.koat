@@ -1,0 +1,7 @@
+(GOAL COMPLEXITY)
+(STARTTERM (FUNCTIONSYMBOLS start))
+(VAR ar_0)
+(RULES
+  start(ar_0) -{0,0}> Com_1(main_Load_1(ar_0)) [ 0 >= 0 ]
+  main_Load_1(ar_0) -{7,i23'*i3' + i3' + 6}> Com_1(main_Return_18(ar_0)) [ 0 >= 0 /\ o24' >= 0 /\ o24' > 0 /\ 0 < i3' /\ -ar_0 < i3' /\ i3' >= 0 /\ o24' < ar_0 /\ -o24' < i23' /\ i23' >= 0 /\ i3' < ar_0 /\ i23' < o24' ]
+)

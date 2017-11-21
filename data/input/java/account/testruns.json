@@ -1,0 +1,49 @@
+{
+    "jar": "Account.jar",
+    "runs": [
+        {
+            "id": "AccountWithSummaries",
+            "frontend": {
+                "config": {
+                    "query": "Account.login(Ljava/lang/String;I)I",
+                    "options": {
+                        "summarize_recursive_methods": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "1",
+                            "justification": "the default summary used for recursive methods is not sound since it assumes constant runtime",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "AccountWithoutSummaries",
+            "frontend": {
+                "config": {
+                    "query": "Account.login(Ljava/lang/String;I)I",
+                    "default_class_init_state": "YES"
+                },
+                "expected": {
+                    "real": "n",
+                    "timeout": true
+                }
+            }
+        }
+    ]
+}

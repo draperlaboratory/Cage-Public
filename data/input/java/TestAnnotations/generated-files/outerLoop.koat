@@ -1,0 +1,8 @@
+(GOAL COMPLEXITY)
+(STARTTERM (FUNCTIONSYMBOLS start))
+(VAR env i25 i24 i1 i2 i29')
+(RULES
+start(env, i25, i24) -{0,0}> outerLoop_ConstantStackPush_1(1 * env, 1 * i25, 1 * i24) :|: 0 >= 0
+outerLoop_ConstantStackPush_1(i1, i2, env) -{2,2}> outerLoop_Load_42(1 * i1, 1 * i2, 0, 1 * env) :|: 0 >= 0
+outerLoop_Load_42(i24, i2, i25, env) -{8,7 + i2}> outerLoop_Load_42(1 * i24, 1 * i2, 1 * i25 + 1, 1 * env) :|: 0 >= 0 && 1 * i25 + 1 = 1 * i29' && 1 * i25 < 1 * i24
+)

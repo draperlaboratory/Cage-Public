@@ -1,0 +1,69 @@
+{
+    "summaries":  [{
+        "class": "java.security.AccessController",
+        "methods": [
+            {
+                "name": "doPrivileged",
+                "descriptor": "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;",
+                "static": false,
+                "complexity": {
+                    "lowerSpace": "2 * arg0 + this",
+                    "upperSpace": "2 * arg0 * env + this",
+                    "lowerTime": "1",
+                    "upperTime": "3 * arg0 + 1"
+                },
+                "lowerSize": [
+                    {
+                        "pos": "this",
+                        "bound": "this"
+                    },
+                    {
+                        "pos": "arg0",
+                        "bound": "0"
+                    },
+                    {
+                        "pos": "ret",
+                        "bound": "0"
+                    },
+                    {
+                        "pos": "env",
+                        "bound": "env"
+                    }
+                ],
+                "upperSize": [
+                    {
+                        "pos": "this",
+                        "bound": "1*this + 1*arg1 + 1*arg2"
+                    },
+                    {
+                        "pos": "arg0",
+                        "bound": "arg0"
+                    },
+                    {
+                        "pos": "ret",
+                        "bound": "env"
+                    },
+                    {
+                        "pos": "env",
+                        "bound": "2 * env"
+                    }
+                ],
+                "modifies": ["env", "arg0"],
+                "taint": {
+                    "mustTaint": ["this"],
+                    "taintAssoc": [
+                        {
+                            "pos": "this",
+                            "taints": ["ret", "arg0"]
+                        },
+                        {
+                            "pos": "arg0",
+                            "taints": ["ret"]
+                        }
+                    ]
+                }
+            }
+        ]
+    }]
+}
+

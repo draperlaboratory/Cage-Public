@@ -1,0 +1,7 @@
+(VAR hd tl accum f)
+(RULES
+ (fold f accum nil) -> accum
+ (fold f accum (cons hd tl)) -> (f accum (fold f hd tl))
+ (add 0 accum) -> accum
+ (add (s hd) accum) -> (s (add hd accum))
+)

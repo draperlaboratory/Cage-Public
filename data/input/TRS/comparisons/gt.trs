@@ -1,0 +1,11 @@
+(COMMENT Compute greater than between two integers defined in the common way)
+
+(VAR x y)
+(GOAL COMPLEXITY)
+
+(RULES
+  Gt(x,x) -> False
+  Gt(S(x), x) -> True
+  Gt(x, S(x)) -> False
+  Gt(S(x), S(y)) -> Gt(x,y)
+)

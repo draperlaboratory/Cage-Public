@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <project basedir="." default="build" name="InfoLeaks">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <property name="cage" location="../.."/>
+    <property name="tools" value="${cage}/tools"/>
+    <property name="joana_loc" value="${tools}/joana.api.jar" />
+    <property name="json-simple_loc" value="${tools}/json-simple-1.1.jar" />
+    <property name="jcommander_loc" value="${tools}/jcommander-1.30.jar" />
+    <path id="InfoLeak.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="${joana_loc}"/>
+    	<pathelement location="${json-simple_loc}"/>
+    	<pathelement location="${jcommander_loc}"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+        <delete file="InfoLeaks.jar"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-project" name="build"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="InfoLeak.classpath"/>
+        </javac>
+    </target>
+    <target name="dist" depends="build">
+      <jar jarfile="InfoLeaks.jar" basedir="bin" includes="**" update="false">
+        <fileset dir="bin" includes="**"/>
+        <manifest>
+      	  <attribute name="Main-Class" value="com.draper.cage.joana.PrintInfoLeaks"/>
+          <attribute name="Class-Path"
+                     value="${joana_loc}
+          	                ${json-simple_loc}
+          	                ${jcommander_loc}"
+          />
+        </manifest>
+      </jar>
+  </target>
+</project>

@@ -1,0 +1,9 @@
+(COMMENT TcT gives linear complexity)
+(COMMENT TcT gives linear complexity with poly)
+(COMMENT TcT gives quadratic complexity with matrix)
+(VAR x y)
+(GOAL COMPLEXITY)
+(RULES
+ add(x, 0) -> x
+ add(x, S(y)) -> S(add(x,y))
+)

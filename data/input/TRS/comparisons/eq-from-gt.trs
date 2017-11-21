@@ -1,0 +1,20 @@
+(COMMENT Compute Equality from gt)
+
+(VAR x y)
+(GOAL COMPLEXITY)
+
+(RULES
+  Gt(x, x) -> False
+  Gt(S(x), x) -> True
+  Gt(x, S(x)) -> False
+  Gt(S(x), S(y)) -> Gt(x,y)
+
+  And(True,True) -> True
+  And(False,x) -> False
+  And(x,False) -> False
+
+  Not(True) -> False
+  Not(False) -> True
+
+  Eq(x,y) -> And(Not(Gt(x,y)), Not(Gt(y,x)))
+)

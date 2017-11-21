@@ -1,0 +1,9 @@
+(VAR x xs ys)
+(RULES
+   @([], ys) -> ys
+   @(::(x, xs), ys) -> ::(x, @(xs, ys))
+   rev([]) -> []
+   rev(::(x, xs)) -> @(rev(xs), ::(x, []))
+   shuffle([]) -> []
+   shuffle(::(x, xs)) -> ::(x, shuffle(rev(xs)))
+)

@@ -1,0 +1,31 @@
+{
+    "jar": "Largest.jar",
+    "runs": [
+        {
+            "id": "largest",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "timeout": 0
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 0
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,155 @@
+{
+    "jar": "ListTest.jar",
+    "runs": [
+        {
+            "id": "ListTest CircularList w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "CircularList.main([Ljava/lang/String;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "INFINITE",
+                        "expected": {
+                            "bound": "n",
+                            "justification": "the summary used for LinkedList.append is not sound since it assumes non cyclic lists/linear runtime",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ListTest CircularList wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "CircularList.main([Ljava/lang/String;)V",
+                },
+                "expected": {
+                    "timeout": true,
+                    "justification": "append is recursive",
+                }
+            }
+        },
+        {
+            "id": "ListTest MultipleInserts w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "MultipleInserts.main([Ljava/lang/String;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "n^3",
+                            "justification": "the size of the integer inserted is added to this, as it depends on input this amounts for the additional *n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ListTest MultipleInserts wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "MultipleInserts.main([Ljava/lang/String;)V"
+                },
+                "expected": {
+                    "timeout": true,
+                    "justification": "append is recursive",
+                }
+            }
+        },
+        {
+            "id": "ListTest MultipleInsertsLinear w/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "MultipleInsertsLinear.main([Ljava/lang/String;)V"
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n^3",
+                            "justification": "the size of the integer inserted is added to this, as it depends on input this amounts for the additional *n, the other *n comes from the fact that we always add at the end of the list, whuch we can't find out using the summary",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "ListTest MultipleInsertsLinear wo/ Summaries",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "MultipleInsertsLinear.main([Ljava/lang/String;)V"
+                },
+                "expected": {
+                    "timeout": true,
+                    "justification": "append is recursive",
+                }
+            }
+        },
+    ]
+}

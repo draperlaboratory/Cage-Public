@@ -1,0 +1,1614 @@
+# ========================================================== #
+# ==================== CURRENT STRATEGY ==================== #
+# ====================  FOR COMMON USE  ==================== #
+# ========================================================== #
+
+main = RunDefaultStrategyForObligation
+
+cls = CLSSlicing[SCCs=True]:
+      CLSToITRS:
+      itrs
+
+dio = Diophantine[Range=3, Engine=PICOSAT]
+
+triples = TriplesToPiDP:workOnPiDP
+
+otrs =
+    Any(
+      OTRSToCSR:
+      csr,
+      OTRSNonTerminationProcessor,
+      Solve(
+        OTRSToQTRS[Transformation=ThiemannII]:
+        qtrs
+      ),
+      Prove(
+        OTRSToQTRS[Transformation=Trivial]:
+        qtrs
+      ),
+      Prove(
+        OTRSToQTRS[Transformation=RaffelsieperZantema]:
+        qtrs
+      )
+    )
+
+qdp = Maybe(depgraph);
+        First(
+          AnyDelay(10000,
+            Solve(
+              Repeat(0,*,workOnDPs)
+            ),
+            qdpNonLoop
+          ),
+          Repeat(0,*,nontermOnDPs)
+      )
+
+# ===================================================== #
+# ==================== QDP NONLOOP ==================== #
+# ===================================================== #
+
+beforeNonLoop = Maybe(QDPQReduction[KeepMinimality = False]):
+                Maybe(QDPMNOC[Reversed = True, TestDepth = 1])
+
+qdpNonLoop = beforeNonLoop:
+             QDPNonLoop[NARROWING = 0, FULLPROOF = False, MAXITERATIONS=2500]
+
+# ======================================================== #
+# ==================== EQUATIONAL TRS ==================== #
+# ======================================================== #
+
+etes = ETESToETRS:equ
+
+equ = Solve(
+        Maybe(ETRSDirectTermination):
+        Maybe(errrPolo):
+        ETRSDependencyPairs:
+        Maybe(EDPDependencyGraph):
+        Solve(Repeat(0,*,workOnEDPs))
+      )
+
+# try polo and if it successful then reapply direct termination afterwards
+errrPolo = Repeat(1,*,
+             Timer(3000,
+               ETRSRRRPolo[Degree = 0, Range = 3, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]
+             )
+           ):
+           Maybe(ETRSDirectTermination)
+
+workOnEDPs = First(
+               EDPDependencyGraph,
+               ESharpUsableEquations,
+               EDPUsableRulesRP[Degree = 1, Range = 3, MaxSimpleDegree = 5, Engine = MINISAT],
+               eqdpqdp,
+               EDPRuleRemoval[Degree = 1, Range = 3, Mode = SEARCHSTRICT, MaxSimpleDegree = 5, Engine = MINISAT],
+               EDPPolo[Degree = 1, Range = 3, Mode = SEARCHSTRICT, MaxSimpleDegree = 4, Engine = MINISAT, Active = True, MergeMutual = True],
+               ECDPPolo[Degree = 0, Range = 1, Mode = SEARCHSTRICT, MaxSimpleDegree = 4, Engine = MINISAT],
+               EDPPolo[Degree = 0, Range = 1, Mode = SEARCHSTRICT, MaxSimpleDegree = 4, Engine = MINISAT, Active = True, MergeMutual = True],
+               ECDPPolo[Degree = 0, Range = 3, Mode = SEARCHSTRICT, MaxSimpleDegree = 4, Engine = MINISAT],
+               EDPPolo[Degree = 0, Range = 3, Mode = SEARCHSTRICT, MaxSimpleDegree = 4, Engine = MINISAT, Active = True, MergeMutual = True],
+               EDPUsableRules:
+               eqdpqdp
+             )
+
+eqdpqdp = EDPToQDPProblem:
+          Solve(
+            Repeat(0,*,
+              workOnDPs
+            )
+          )
+# ====================================================== #
+# ==================== TRS STANDARD ==================== #
+# ====================================================== #
+
+trs = TRSToQTRS:qtrs
+gtrs = GTRSToQTRS:qtrs
+
+qtrs = If[Condition = QTRSCardinality[Size = 1000], Sub1 = "bigqtrs", Sub2 = "smallqtrs"]
+
+bigqtrs = QTRSDependencyPairs ;
+          Repeat(0,*,
+            First(
+              QDPDependencyGraph,
+              QDPSizeChange[Subterm = True],
+              qdp
+            )
+          )
+
+smallqtrs = First(
+              Solve(
+                QTRSToCSR:
+                csr
+              ),
+              realqtrs
+            )
+
+realqtrs = Repeat(0,*,
+             Any(
+               Timer(2000,
+                 QTRSRRR[Order = POLO[Degree = 1, Range = 2, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]]
+               ),
+               Timer(4000,
+                 QTRSRRR[Order = RPOS[Engine = MINISAT, Quasi = True, Afstype = MONOTONEAFS]]
+               ),
+               Timer(4000,
+                 QTRSRRR[Order = KBO[Engine = YICES]]
+               )
+             )
+           ):
+           Maybe(QTRSAAECCNOC[Limit = 1]):
+           QTRSDependencyPairs:
+           qdp
+
+workOnDPs = First(
+              defaults,
+              QDPATransformation[BeComplete = True, KeepMinimality = True],
+              solver1,
+              tosrs,
+              If[Condition = CADE09[Size = 5]](solver2IndDecr, decrSolver2),
+              If[Condition=CONSTNARR07](basicNI),
+              If[Condition=CONSTNARR07](advancedNI),
+              incr,
+              Any(
+                Timer(5000,
+                  QDPNonMonReductionPair[Allstrict = False, PosRange = 1, NegRange = -1, Heuristic = CAND1, SatConverter = PLAIN[GTMode=DEEP, SumType=MINIMAL, PowersAsComb=False, UseIFFsInGT = True, NewTimes = True], Engine = MINISAT[Version = 2]]
+                ),
+                nontermSub1
+              ),
+              solver3,
+              Any(
+                QDPReductionPair[Active = True, Allstrict = False, Order = PMatroArcticInt[Collapse=True, Engine=MINISAT, Dimension=4, Max=1, Unary=True], MergeMutual = True],
+                nontermSub2,
+                QDPReductionPair[Active = True, Allstrict = False, Order = PMatroNat[Collapse=True, Engine=MINISAT, Dimension=4, Range=3], MergeMutual = True],
+                Timer(5000,
+                  QDPBoundsTAProcessor[STAS = DP_SPLIT, CRS = MYCRS2, MAX_CONFLICTS_TO_RESOLVE = 50000, MAX_TRANSITIONS_OF_A = 30000, MAX_STATES_OF_A = 50000]
+                )
+              ),
+              QDPRootLabelingFC2[Heuristic = LabelAll, PreserveMinimality = False]
+            )
+
+nontermSub1 = If[Condition=RtiContains[Key=AVOID_NONTERM],
+                Sub1="fail",
+                Sub2="real_nontermSub1"
+              ]
+
+real_nontermSub1 = Timer(10000,
+                     QDPNonTerm[TotalLimit = 3, LeftLimit = 3, RightLimit = 3]
+                   )
+
+nontermSub2 = If[Condition=RtiContains[Key=AVOID_NONTERM],
+                Sub1="fail",
+                Sub2="real_nontermSub2"
+              ]
+
+real_nontermSub2 = QDPNonTerm[TotalLimit = 8, LeftLimit = 8, RightLimit = 8]
+
+defaults = First(
+             depgraph,
+             Timer(500, QDPMNOC[TestDepth = 2]),
+             QDPUsableRules[BeComplete = True, UseApplicativeCeRules = True],
+             QDPQReduction
+           )
+
+solver1 = First(
+            Timer(250, QDPSizeChange[Subterm = True]),
+            MRR06Heuristic[Sub1="usableRulesRP2", Sub2="ruleRemoval2", AllowATransformation=True],
+            Timer(250, QDPMatchbounds[EdgeBound=700, NodeBound=300])
+          )
+
+ruleRemoval2 = Any(
+                 Timer(1000,
+                   QDPMRR[Order = KBO[Engine = YICES]]
+                 ),
+                 Timer(1000,
+                   QDPMRR[Order = POLO[Degree = 1, Range = 2, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]]
+                 )
+               )
+
+usableRulesRP2 = Timer(900,
+                   QDPUsableRulesRP[AllowATransformation = True, Degree = 1, Range = 2, MaxSimpleDegree = 5, Engine = MINISAT]
+                 )
+
+tosrs = QDPToSRS[Zantema = True]:
+        QTRSDependencyPairs
+
+decr = Repeat(1,*,
+         First(
+           Timer(500,QDPRewriting[Limit = 50, BeComplete = False]),
+           Timer(500,QDPNarrowing[Limit = 0, BeComplete = False, Positional = True]),
+           Timer(500,QDPInstantiation[Limit = 0])
+         ):
+         Repeat(0,*,defaults)
+       )
+
+solver2 = Any(
+            First(
+              Timer(5000, QDPReductionPair[Active = True, Allstrict = False, Order=NEGPOLO[Range=2, PosConstantRange=2, NegConstantRange=-2, Restriction=2, NegRangeCriterion = DAMPEN, PartialDioEval = True, Engine = MINISAT]]),
+              Timer(5000, QDPReductionPair[Order = GPOLORATSIMPLE[Degree = 1, DenominatorRange = 4, NumeratorRange = 16, Heuristic = FULLRAT, OPCSolver = MBYNTOFORMULA[FixDenominator = True, Solver = SAT[SatConverter = PLAIN[UseShifts=True, UseBinaryShifts=False, UnaryMode=CIRCUIT, NewUnaryPower=True], SatBackend = MINISAT, Simplification = MAXIMUM, SimplifyAll = True, StripExponents = False]], MaxSimpleDegree = -1, StrictMode = SEARCHSTRICT]]),
+              Timer(5000, QDPReductionPair[Active = True, Allstrict = False, Order = PMatroNat[Collapse=True, Engine=MINISAT, Dimension=2, Range=1], MergeMutual = True]),
+              Timer(5000, QDPReductionPair[Order = MMPOLO[StripExponents = True, Simplification = MAXIMUM, Heuristic = CAND1, SatConverter = PLAIN, Engine = MINISAT, Range = 1], ATrans = True, Active = True, MergeMutual = True, Usable = True, Allstrict = False])
+            ),
+            First(
+              Timer(11000, QDPReductionPair[Active = True, Allstrict = False, Order = RPOS[Quasi = True, Engine=MINISAT, Afstype = FULLAFS]]),
+              Timer(12000, QDPReductionPair[Active = True, Allstrict = False, Order = PMatroArcticInt[Collapse=True, Engine=MINISAT, Dimension=1, Max=5, Unary=True], MergeMutual = True])
+            ),
+            First(
+              Timer(3000, QDPReductionPair[Order = KBO[Engine = YICES]]),
+              Timer(20000, QDPReductionPair[Active = True, Allstrict = False, Order = POLO[Autostrict = False, Degree = 1, Range = 1, MaxSimpleDegree = 4, Engine = MINISAT], MergeMutual = True])
+            )
+          )
+
+solver2IndDecr = First(
+                   solver2,
+                   qdpThm,
+                   decr
+                 )
+
+decrSolver2 = First(
+                decr,
+                Any(
+                  solver2,
+                  Timer(2000, QDPQMonMRR[Order = POLO[Range = 2, Engine = MINISAT], DeleteROnly = False])
+                )
+              )
+
+
+
+basicNI = Maybe(QDPComplexConstantRemoval):
+          First(
+            Timer(1700, QDPNonInfReductionPair[InductionCounter = 2, LeftChainCounter = 1, RightChainCounter = 0, Engine=MINISAT]),
+            Timer(1700, QDPNonInfReductionPair[InductionCounter = 2, LeftChainCounter = 0, RightChainCounter = 1, Engine=MINISAT])
+          )
+
+advancedNI = If[Condition = BRANCHING,
+               Sub1 = "tupleNI",
+               Sub2 = "checkMax"
+             ]
+
+checkMax = If[Condition = SINGLERULE,
+             Sub1 = "maxNIlong",
+             Sub2 = "maxNIshort"
+           ]
+
+maxNIlong = Timer(12000,
+              Maybe(QDPComplexConstantRemoval):
+              QDPNonInfReductionPair[InductionCounter = 4, LeftChainCounter = 0, RightChainCounter = 1, Maximum=1, MaximumForSmall=2, Minimum=1, Engine=MINISAT]
+            )
+
+maxNIshort = Timer(6000,
+               Maybe(QDPComplexConstantRemoval):
+               QDPNonInfReductionPair[InductionCounter = 4, LeftChainCounter = 0, RightChainCounter = 1, Maximum=1, MaximumForSmall=2, Minimum=1, Engine=MINISAT]
+             )
+
+tupleNI = Timer(6000,
+            Maybe(QDPComplexConstantRemoval):
+            QDPNonInfReductionPair[InductionCounter =2, Maximum = 1, DegreeTuple = -2, LeftChainCounter = 2, RightChainCounter = 0, Engine=MINISAT]
+          )
+
+
+incr = Repeat(1,*,
+         First(
+           Timer(500,QDPRewriting[Limit = 50, BeComplete = False]),
+           Timer(500,QDPNarrowing[Limit = 1, BeComplete = False, Positional = True]),
+           Timer(500,QDPInstantiation[Limit = 2]),
+           Timer(2000,QDPForwardInstantiation[Limit = 1])
+         ):
+         Repeat(0,*,defaults)
+       )
+
+solver3 = Any(
+            Timer(15000, QDPReductionPair[Active = True, Allstrict = False, Order = PMatroNat[Collapse=True, Range = 3, Engine = MINISAT, Dimension = 2], MergeMutual = True]),
+            Timer(15000, QDPReductionPair[Active = True, Allstrict = False, Order = PMatroArcticInt[Collapse=True, Max = 3, Engine = MINISAT, Dimension = 3, Unary=True], MergeMutual = True]),
+            Timer(10000, QDPReductionPair[Active = True, Allstrict = False, Order = POLO[Autostrict = False, Degree = SIMPLE_MIXED, Range = 1, MaxSimpleDegree = 4, Engine = MINISAT], MergeMutual = True]),
+            Timer(20000, QDPSemanticLabelling[CarrierSetSize = 2, Strategy="semlab", AllowQuasi=False, Engine=SAT4J, IncrementalEngine=INCREMENTAL]),
+            Timer(1000, QDPReductionPair[Active = True, Allstrict = False, Order = POLO[Autostrict = False, Degree = 2, Range = 2, MaxSimpleDegree = 4, Engine = MINISAT], MergeMutual = True]),
+            Timer(1000, QDPReductionPair[Active = True, Allstrict = False, Order = PMatroArcticInt[Collapse=True, Engine=MINISAT, Dimension=1, Max=1, Min=-1, Unary=True], MergeMutual = True])
+          )
+
+semlab = RepeatS(1,*,
+           First(
+             QDPDependencyGraph,
+             MRR06Heuristic[AllowATransformation = False, Sub1="usableRulesRP1", Sub2="ruleRemoval1"],
+             Timer(7500,QDPReductionPair[Active = True, Allstrict = False, Order = POLO[Degree = 1, Range = 1, MaxSimpleDegree = 4, Engine = MINISAT], MergeMutual = True])
+           )
+         )
+ruleRemoval1 = Timer(500,
+                 QDPMRR[Order = POLO[Degree = 1, Range = 1, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]]
+               )
+
+usableRulesRP1 = Timer(600,
+                   QDPUsableRulesRP[AllowATransformation = False, Degree = 1, Range = 1, MaxSimpleDegree = 5, Engine = MINISAT]
+                 )
+
+# ============================================================ #
+# ==================== QDP THEOREM PROVER ==================== #
+# ============================================================ #
+
+# Subsection for techniques based on QDPTheoremProver
+qdpThm = First(
+           qdpThmNoUnpack,
+           qdpThmWithUnpackR3,
+           qdpThmWithUnpackInstantiation
+         )
+
+qdpThmNoUnpack = QDPTheoremProver[Order = POLO[Engine = MINISAT, Range = 1, Degree = 1],
+                                  RuleHeuristic = SMALL_OR_LAST_CALL,
+                                  TheoremProverStrategy = "thm",
+                                  TheoremProverTimeLimit = "3",
+                                  UnpackConstructors = False,
+                                  Runner = APROVE,
+                                  RemoveDuplicates = False]:
+                 Solve(RunDefaultStrategyForObligation)
+
+qdpThmWithUnpack = QDPTheoremProver[Order = POLO[Engine = MINISAT, Range = 1, Degree = 1],
+                                    RuleHeuristic = SMALL_OR_LAST_CALL,
+                                    TheoremProverStrategy = "thmShort",
+                                    TheoremProverTimeLimit = "3",
+                                    UnpackConstructors = True,
+                                    Runner = APROVE,
+                                    RemoveDuplicates = True]:
+                   Solve(RunDefaultStrategyForObligation)
+
+qdpThmWithUnpackR3 = QDPTheoremProver[Order = POLO[Engine = MINISAT, Range = 3, Degree = 1],
+                                      RuleHeuristic = SMALL_OR_LAST_CALL,
+                                      TheoremProverStrategy = "thmShort",
+                                      TheoremProverTimeLimit = "3",
+                                      UnpackConstructors = True,
+                                      Runner = APROVE,
+                                      RemoveDuplicates = True]:
+                     Solve(RunDefaultStrategyForObligation)
+
+qdpThmWithUnpackInstantiation = QDPInstantiation[Limit=2]:
+                                qdpThmWithUnpack
+
+
+nontermOnDPs = If[Condition=RtiContains[Key=AVOID_NONTERM],
+                 Sub1="fail",
+                 Sub2="real_nontermOnDPs"
+               ]
+
+real_nontermOnDPs = First(
+                      defaults,
+                      QDPATransformation[BeComplete = True, KeepMinimality = False],
+                      QDPNonTerm[TotalLimit = 3, LeftLimit = 3, RightLimit = 3]
+                    )
+
+
+# ====================================================== #
+# ==================== SRS STANDARD ==================== #
+# ====================================================== #
+srs = TRSToQTRS:qsrs
+
+qsrs = Any(
+         Solve(SRSNonLoop),
+         Solve(Timer(10000,SRSNonLoop[CompareWithOC1=0])),
+         Solve(workOnSRS),
+         Solve(QTRSReverse:workOnSRS)
+       )
+
+
+workOnSRS = Any(
+              srsmb,
+              Maybe(srsrrr):
+               Maybe(QTRSAAECCNOC[Limit=1]):
+               QTRSDependencyPairs:
+              srsdp,
+              srsrootlabloop
+            )
+
+srsmb = Any(
+          Timer(5000, QTRSMatchbounds[NodeBound=160, EdgeBound=320]),
+          QTRSStripSymbols:
+          Timer(5000, QTRSMatchbounds[NodeBound=160, EdgeBound=320]),
+          Timer(5000, QTRSRoofMatchBoundsTAProcessor[STAS = OSFEFS, CRS = KMS, MAX_STATES_OF_A = 200, MAX_TRANSITIONS_OF_A = 400])
+        )
+
+srsrootlabloop = Solve(
+                   rootlab:
+                   First(
+                     Solve(workOnSRS2),
+                     srsrootlabloop
+                   )
+                 )
+
+workOnSRS2 = Maybe(srsrrr2):
+             Maybe(QTRSAAECCNOC[Limit=1]):
+             QTRSDependencyPairs:
+             srsdp2
+
+
+#srsrrr = Timer(15000, srsmanyrrr)
+srsrrr = Timer(15000,
+           Repeat(0, *,
+             Any(QTRSRRR[Order = KBOPOLO])
+           )
+         )
+
+#srsrrr2 = Timer(25000, srsmanyrrr)
+srsrrr2 = Timer(15000,
+            Repeat(0, *,
+              Any(QTRSRRR[Order = KBOPOLO])
+            )
+          )
+
+srsmanyrrr = Repeat(0, *,
+               Any(
+                 QTRSRRR[Order = KBO[Engine = YICES]],
+                 QTRSRRR[Order = POLO[Degree = 1, Range = 3, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]],
+                 QTRSRRR[Order = PMatroNat[Engine = MINISAT, Range = 1, Dimension = 3, Collapse = False]],
+                 QTRSRRR[Order = PPO[Engine = MINISAT[Version = 2], Quasi = True, Multiset = False, Lex = True, Prec = True, Permute = True, Xgengrc = True, Afstype = MONOTONEAFS]]
+               )
+             )
+
+srsmanyrrr2 = Repeat(0, *,
+                Any(
+                  QTRSRRR[Order = KBO[Engine = YICES]],
+                  QTRSRRR[Order = POLO[Degree = 1, Range = 2, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]],
+                  QTRSRRR[Order = PMatroNat[Engine = MINISAT, Range = 1, Dimension = 2, Collapse = False]]
+                )
+              )
+
+
+srsdp = Solve(
+          Repeat(0, *,
+            First(
+              QDPDependencyGraph,
+              srseasy,
+              Any(
+                srsRedPair,
+                Solve(
+                  Repeat(0,*,srsnontermOnDPs)
+                )
+              ) # Any
+            ) # First
+          ) # Repeat
+        ) # Solve
+
+srsdp2 = Solve(
+           Repeat(0, *,
+             First(
+               QDPDependencyGraph,
+               srseasy,
+               srsRedPair2
+             )
+           )
+         )
+
+srseasy = First(
+            QDPDependencyGraph,
+            Timer(500, QDPMNOC[TestDepth = 2]),
+            QDPUsableRules[BeComplete = True, UseApplicativeCeRules = True],
+            QDPQReduction
+          )
+
+srsnontermOnDPs = First(
+                    srseasy,
+                    Timer(6000, QDPNonTerm[TotalLimit = 3, LeftLimit = 3, RightLimit = 3])
+                  )
+
+srsdecr = Repeat(1,*,
+            First(
+              Timer(500,QDPRewriting[Limit = 50, BeComplete = False]),
+              Timer(500,QDPNarrowing[Limit = 0, BeComplete = False, Positional = True]),
+              Timer(500,QDPInstantiation[Limit = 0])
+            ):
+            Repeat(0,*,srseasy)
+          )
+
+srsRedPair = First(
+               Any(
+                 Timer(1000, QDPSizeChange[Subterm = True]),
+                 Timer(10000, QDPMRR[Order = POLO[Degree = 1, Range = 3, Autostrict = False, MaxSimpleDegree = 10000, Engine = MINISAT]]),
+                 Timer(10000, QDPReductionPair[Order = NEGPOLO[Engine = MINISAT[Version = 2], Range = 2, NegConstantRange=-2, PosConstantRange = 2, NegRangeCriterion = DAMPEN, PartialDioEval = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPReductionPair[Order = POLO[Engine = MINISAT[Version = 2], Range = 1, Degree = 1, LinearMonotone = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPReductionPair[Order = POLO[Engine = MINISAT[Version = 2], Range = 5, Degree = 1, LinearMonotone = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Max = 1, Dimension = 3, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False])),
+               Any(
+                 Timer(10000, QDPReductionPair[Order = PPO[Engine = MINISAT[Version = 2], Quasi = True, Multiset = False, Lex = True, Prec = True, Permute = True, Xgengrc = True, Afstype = FULLAFS], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPUsableRulesRP[AllowATransformation = False, Degree = 1, Range = 3, MaxSimpleDegree = 5, Engine = MINISAT]),
+                 Timer(10000, QDPReductionPair[Order = GPOLORATSIMPLE[Degree = 1, DenominatorRange = 4, NumeratorRange = 16, Heuristic = FULLRAT, OPCSolver = MBYNTOFORMULA[FixDenominator = True, Solver = SAT[SatConverter = PLAIN[UseShifts=False, UseBinaryShifts=False, UnaryMode=CIRCUIT, NewUnaryPower=True], SatBackend = MINISAT, Simplification = MAXIMUM, SimplifyAll = True, StripExponents = False]], MaxSimpleDegree = -1, StrictMode = SEARCHSTRICT]]),
+                 Timer(10000, QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Min = -1, Max = 2, Dimension = 3, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPReductionPair[Order = PMatroNat[Engine = MINISAT[Version = 2], Range = 3, Dimension = 3, Collapse = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                 Timer(10000, QDPReductionPair[Order = PMatroNat[Engine = MINISAT[Version = 2], Range = 1, Dimension = 5, Collapse = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False])),
+               srsdecr,
+               Any(
+                 QDPSemanticLabelling[CarrierSetSize = 2, Strategy="semlab", AllowQuasi=False, Engine=SAT4J, IncrementalEngine=INCREMENTAL],
+                 QDPReductionPair[Order = PMatroNat[Engine = MINISAT[Version = 2], Range = 1, Dimension = 6, Collapse = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                 QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Max = 1, Dimension = 5, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                 QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Min = -1, Max = 3, Dimension = 5, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                 QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Min = -1, Max = 2, Dimension = 7, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]
+               )
+             )
+
+
+srsRedPair2 = First(
+                Any(
+                  Timer(5000, QDPSizeChange[Subterm = True]),
+                  Timer(10000, QDPReductionPair[Order = NEGPOLO[Engine = MINISAT[Version = 2], Range = 2, NegConstantRange=-2, PosConstantRange = 2, NegRangeCriterion = DAMPEN, PartialDioEval = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                  Timer(10000, QDPReductionPair[Order = POLO[Engine = MINISAT[Version = 2], Range = 1, Degree = 1, LinearMonotone = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                  Timer(10000, QDPReductionPair[Order = POLO[Engine = MINISAT[Version = 2], Range = 5, Degree = 1, LinearMonotone = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                  Timer(10000, QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Max = 1, Dimension = 3, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False])),
+                Any(
+                  Timer(10000, QDPReductionPair[Order = PPO[Engine = MINISAT[Version = 2], Quasi = True, Multiset = False, Lex = True, Prec = True, Permute = True, Xgengrc = True, Afstype = FULLAFS], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                  Timer(10000, QDPReductionPair[Order = GPOLORATSIMPLE[Degree = 1, DenominatorRange = 4, NumeratorRange = 16, Heuristic = FULLRAT, OPCSolver = MBYNTOFORMULA[FixDenominator = True, Solver = SAT[SatConverter = PLAIN[UseShifts=False, UseBinaryShifts=False, UnaryMode=CIRCUIT, NewUnaryPower=True], SatBackend = MINISAT, Simplification = MAXIMUM, SimplifyAll = True, StripExponents = False]], MaxSimpleDegree = -1, StrictMode = SEARCHSTRICT]]),
+                  Timer(10000, QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Min = -1, Max = 2, Dimension = 3, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]),
+                  Timer(10000, QDPReductionPair[Order = PMatroNat[Engine = MINISAT[Version = 2], Range = 1, Dimension = 3, Collapse = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False])),
+                Any(
+                  QDPSemanticLabelling[CarrierSetSize = 2, Strategy="semlab", AllowQuasi=False, Engine=SAT4J, IncrementalEngine=INCREMENTAL],
+                  QDPReductionPair[Order = POLO[Engine = MINISAT[Version = 2], Range = 2, Degree = SIMPLE_MIXED], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                  QDPReductionPair[Order = MATRO[Engine = MINISAT, SatConverter=PLAIN[UseShifts=True, UseBinaryShifts=False, SumType=DUAL_COMB], Range=8, Denominator=2, Rational=True, Type=COLLAPSINGDPTUPLE[Size=2]]],
+                  QDPReductionPair[Order = PMatroNat[Engine = MINISAT[Version = 2], Range = 1, Dimension = 6, Collapse = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                  QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Max = 1, Dimension = 5, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False],
+                  QDPReductionPair[Order = PMatroArcticInt[Engine = MINISAT[Version = 2], Min = -1, Max = 3, Dimension = 5, Collapse = True, Unary = True], Allstrict = False, Usable = True, Active = True, ATrans = False, MergeMutual = False]
+                )
+              )
+
+# ================================================================= #
+# ==================== ROOT LABELING TRS & SRS ==================== #
+# ================================================================= #
+
+# can be used both for TRSs and for SRSs
+rootlab = Maybe(QTRSFlatCC):
+          QTRSRootLabeling
+
+relrootlab = Maybe(RelTRSFlatCC):
+          RelTRSRootLabeling[Heuristic = LabelAll]
+
+
+# ====================================================== #
+# ==================== TRS RELATIVE ==================== #
+# ====================================================== #
+
+rtrs = Maybe(RelTRSSCleaner):
+       First(
+         Solve(RelTRSEmptinessCheck:RunDefaultStrategyForObligation),
+         Solve(RelTRSQCCheck:qtrs),
+         Solve(RelTRStoQDP:qdp),
+         Any(
+           relloopfinder,
+           workonrel,
+           relrootlabloop
+         )
+       )
+
+relrootlabloop = Solve(
+                   relrootlab:
+                   First(
+                     workonrel,
+                     relrootlabloop
+                   )
+                 )
+
+workonrel = Solve(
+              Repeat(0, *,
+                First(
+                  RelTRSEmptinessCheck:
+                  RunDefaultStrategyForObligation,
+                  relruleremoval
+                )
+              )
+            )
+
+relloopfinder = First(
+                  Timer(5000, RelTRSEmission),
+                  Timer(10000, RelTRSLoopFinder[TotalLimit = 3, LeftLimit = 3, RightLimit = 3]),
+                  RelTRSLoopFinder[TotalLimit = 8, LeftLimit = 8, RightLimit = 8]
+                )
+
+relruleremoval = First(
+                   Any(
+                     Timer(8000, RelRR[Order = KBO[Engine = YICES]]),
+                     Timer(8000, RelRR[Order = RPOS[Engine = MINISAT, Quasi = True, Afstype = MONOTONEAFS]]),
+                     Timer(8000, RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 1]]),
+                     Timer(8000, RelRR[Order = PMatroNat[Collapse=False, Engine = MINISAT, Dimension = 2, Range = 1]])
+                   ),
+                   Any(
+                     Timer(12000, RelTRSSemanticLabelling),
+                     Timer(12000, RelRR[Order = PMatroNat[Collapse=False, Engine = MINISAT, Dimension = 2, Range = 3]]),
+                     Timer(12000, RelRR[Order = POLO[Engine = MINISAT, Degree = SIMPLE_MIXED, Range = 1]]),
+                     Timer(12000, RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 7]])
+                   ),
+                   Any(
+                     RelRR[Order = KBOPOLO],
+                     RelRR[Order = PMatroNat[Collapse=False, Engine = MINISAT, Dimension = 3, Range = 3]],
+                     RelRR[Order = PMatroNat[Collapse=False, Engine = MINISAT, Dimension = 5, Range = 2]],
+                     RelRR[Order = POLO[Engine = MINISAT, Degree = SIMPLE_MIXED, Range = 3]]
+                   )
+                 )
+
+
+# ====================================================== #
+# ==================== SRS RELATIVE ==================== #
+# ====================================================== #
+
+rsrs = Maybe(RelTRSSCleaner):
+       First(
+         Solve(
+           RelTRSEmptinessCheck:
+           RunDefaultStrategyForObligation
+         ),
+         Any(
+           relloopfinder,
+           workOnRelSRS,
+           relSRSrootlabloop,
+           RelSRSReverse:
+           Any(
+             relloopfinder,
+             workOnRelSRS,
+             relSRSrootlabloop
+           )
+         )
+       )
+
+relSRSrootlabloop = Solve(
+                      relrootlab:
+                      First(
+                        workOnRelSRSrootlab,
+                        relSRSrootlabloop
+                      )
+                    )
+
+workOnRelSRS = Solve(
+                 Repeat(0, *,
+                   First(
+                     RelTRSEmptinessCheck:RunDefaultStrategyForObligation,
+                     relSRSruleremoval
+                   )
+                 )
+               )
+
+workOnRelSRSrootlab = Solve(
+                        Repeat(0, *,
+                          First(
+                            RelTRSEmptinessCheck:RunDefaultStrategyForObligation,
+                            relSRSruleremovalRootlab
+                          )
+                        )
+                      )
+
+relSRSruleremoval = First(
+                      Any(
+                        Timer(12000, RelRR[Order = KBO[Engine = YICES]]),
+                        Timer(12000, RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 1]]),
+                        Timer(12000, RelRR[Order = PMatroNat[Engine = MINISAT, Dimension = 2, Range = 2, Collapse = False]])
+                      ),
+                      Any(
+                        RelTRSSemanticLabelling,
+                        RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 5]],
+                        RelRR[Order = RPOS[Engine = MINISAT, Quasi = True, Afstype = MONOTONEAFS]],
+                        RelRR[Order = PMatroNat[Engine = MINISAT, Dimension = 3, Range = 3, Collapse = False]],
+                        RelRR[Order = PMatroNat[Engine = MINISAT, Dimension = 6, Range = 1, Collapse = False]]
+                      ),
+                      relrootlab
+                    )
+
+relSRSruleremovalRootlab = First(
+                             Any(
+                               Timer(12000, RelRR[Order = KBO[Engine = YICES]]),
+                               Timer(12000, RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 1]]),
+                               Timer(12000, RelRR[Order = PMatroNat[Engine = MINISAT, Dimension = 2, Range = 2, Collapse = False]])
+                             ),
+                             Any(
+                               Timer(20000, RelTRSSemanticLabelling),
+                               Timer(20000, RelRR[Order = POLO[Engine = MINISAT, Degree = 1, Range = 5]]),
+                               Timer(20000, RelRR[Order = PMatroNat[Engine = MINISAT, Dimension = 3, Range = 1, Collapse = False]])
+                             )
+                           )
+
+# ==================================================== #
+# ==================== NEW PROLOG ==================== #
+# ==================================================== #
+
+plterm = Maybe(BuiltinConflictTransformation[Complexity = False]) :
+         Any(
+             prologWithoutTransformation,
+             prologWithTransformation,
+             prologWithIntHandling,
+             PrologToTRS[ShowTree = False, ExportTree = False, TreeLimit = 50, MinExSteps = 1, GeneralizationDepth = 7, GeneralizationPosition = 2, MaxBranchingFactor = 3, NoGroundLoss = True]: qtrs
+            )
+
+plcomp = Maybe(BuiltinConflictTransformation[Complexity = True]) : \
+      Maybe(NoRecursion[Complexity = True]) : \
+      Maybe(LPReordering) : \
+      Any(Solve(PrologToCdtProblem[ShowTree = False, ExportTree = False, TreeLimit = 50, MinExSteps = 1, GeneralizationDepth = 7, GeneralizationPosition = 2, MaxBranchingFactor = 3] : cdtforprolog),
+          Solve(PrologToCdtProblem[ShowTree = False, ExportTree = False, TreeLimit = 50, MinExSteps = 2, GeneralizationDepth = 7, GeneralizationPosition = 2, MaxBranchingFactor = 3] : cdtforprolog))
+
+cdtforprolog = Repeat(0,*,ComplexCdtTransformation) : \
+      Solve(cdtCleanup : cdtSolve)
+#      Any( \
+#          prologWithoutTransformation, \
+#          prologWithTransformation, \
+#          prologWithIntHandling \
+#         )
+
+pldet = Maybe(BuiltinConflictTransformation[Complexity = False]) :
+        PrologDeterminacy
+
+workOnPiDP = RepeatS(0,*,First( \
+                               PiDPDependencyGraph, \
+                               PiUsableRules \
+                              )) \
+           : PiDPToQDP : RepeatS(0,*,workOnDPs)
+
+prologWithoutTransformation = Maybe(  Repeat(0,*, First(CallTransformation,NotTransformation,CutElimination,IfThenElseTransformation) )  ) : \
+                              Maybe(FailTransformation) : \
+                              Maybe(UnifyTransformation) : \
+                              Maybe(OrTransformation) : \
+                              Maybe(UndefinedPredicateHandling) : \
+                              Any( \
+                                  Solve(NewPrologToPiTRS[Force = True] : PiDependencyPairs : workOnPiDP), \
+                                  Solve(NewPrologToPiTRS[Force = False] : PiDependencyPairs : workOnPiDP) \
+                                 )
+
+prologWithTransformation = PrologToDTProblem[ShowTree = False, ExportTree = False, TreeLimit = 50, MinExSteps = 2, GeneralizationDepth = 7, GeneralizationPosition = 2, MaxBranchingFactor = 3]: \
+                           Maybe(UndefinedPredicateRemoval) : \
+                           Solve(TriplesToPiDP : workOnPiDP)
+
+prologWithIntHandling = IntegerArithmeticTransformation : \
+                        Maybe(  Repeat(0,*, First(CallTransformation,NotTransformation,CutElimination,IfThenElseTransformation) )  ) : \
+                        Maybe(FailTransformation) : \
+                        Maybe(UnifyTransformation) : \
+                        Maybe(OrTransformation) : \
+                        Maybe(UndefinedPredicateHandling) : \
+                        Any( \
+                            Solve(NewPrologToPiTRS[Force = True] : PiDependencyPairs : workOnPiDP), \
+                            Solve(NewPrologToPiTRS[Force = False] : PiDependencyPairs : workOnPiDP) \
+                           )
+
+
+
+# ================================================= #
+# ==================== HASKELL ==================== #
+# ================================================= #
+
+hs = HaskellLambdaReduction:
+     HaskellCaseReduction:
+     HaskellIfReduction:
+     HaskellIrrPatReduction:
+     HaskellBindingReduction:
+     HaskellCondReduction:
+     HaskellNewTypeReduction:
+     HaskellIrrPatReduction:
+     HaskellLetReduction:
+     HaskellNumReduction:
+     HaskellSplit:
+     HaskellNarrowing[AddTypes = False, TerminationStrategy="workOnQDPHaskell", NonTerminationStrategy="workOnQDPNonTermHaskell"]
+
+workOnQDPHaskell = RepeatS(0,*,
+                     First(
+                       QDPMNOC,
+                       QDPDependencyGraph,
+                       decrHaskell,
+                       QDPSizeChange[Subterm=True],
+                       QDPSizeChange[Subterm=False,Range=1,UsableArgumentsRestriction=0,AfsRestriction=2],
+                       parallelHaskell,
+                       Timer(2000, QDPReductionPair[Order=POLO[Engine=MINISAT[Version = 2], Range=3, Degree=1], Active=True]),
+                       basicNonInfHaskell,
+                       ptrHaskell,
+                       incrHaskell
+                     )
+                   )
+
+workOnQDPNonTermHaskell = RepeatS(0,*,
+                            First(
+                              QDPDependencyGraph,
+                              QDPUsableRules,
+                              nonTermParallelHaskell,
+                              QDPLoopFinder[TotalLimit=4, LeftLimit=0, RightLimit=4]
+                            )
+                          )
+
+nonTermParallelHaskell = First(
+                           Timer(5000, Any(
+                                         QDPSizeChange[Subterm=False,Range=1,UsableArgumentsRestriction=2,AfsRestriction=2],
+                                         QDPRuleRemoval[Range=2]
+                                       )
+                           ),
+                           Timer(2000, QDPReductionPair[Order=POLO[Engine=MINISAT[Version = 2],Range=1,Degree=1],Active=True])
+                         )
+
+parallelHaskell = First(
+                    Timer(5000, Any(
+                                  QDPSizeChange[Subterm=False,Range=1,UsableArgumentsRestriction=2,AfsRestriction=2],
+                                  QDPRuleRemoval[Range=2]
+                                )
+                    ),
+                    Timer(2000, QDPReductionPair[Order=POLO[Engine=MINISAT[Version = 2], Range=1, Degree=1], Active=True]),
+                    Timer(5000,QDPNonTerm)
+                  )
+
+basicNonInfHaskell = QDPAddDPConstraints[InductionCounter = 2, LeftChainCounter = 0, RightChainCounter = 1]:
+                     QDPNonInfReductionPair[InductionCounter = 2, LeftChainCounter = 0, RightChainCounter = 1]
+
+ptrHaskell = QDPPairToRule
+
+incrHaskell = Repeat(1,*, First(
+                            QDPRewriting,
+                            QDPNarrowing[Limit = 4]
+                          ):
+                          Repeat(0,*, defaults)
+                    )
+
+decrHaskell = Repeat(1,*,
+                First(QDPRewriting, QDPNarrowing, QDPInstantiation):
+                Repeat(0,*,defaults)
+              )
+
+# ========================================================= #
+# ==================== TRS CONDITIONAL ==================== #
+# ========================================================= #
+
+ctrs = CTRSToQTRS:qtrs
+
+# TRS context-sensitive
+#csr = Maybe(CSRInnermost):CSR06Heuristic
+#csrLuc = CSRToQTRS[Transformation = Lucas]
+#csrZan = CSRToQTRS[Transformation = Zantema]
+#csrFR = CSRToQTRS[Transformation = ImprovedFerreiraRibeiro]
+#csrGM1 = CSRToQTRS[Transformation = IncompleteGieslMiddeldorp]
+#csrGM2 = CSRToQTRS[Transformation = CompleteGieslMiddeldorp]
+#csrGM3 = CSRToQTRS[Transformation = InnermostGieslMiddeldorp]
+#csrTerm = First(
+#               Timer(10000, Solve(csrLuc:csrqtrs)),
+#               Timer(20000, Solve(csrZan:csrqtrs)),
+#               Timer(15000, Solve(csrGM1:csrqtrs)),
+#               Timer(10000, Solve(csrFR:csrqtrs)),
+#               Solve(csrGM2:csrqtrs)
+#              )
+#csrInn = First(
+#              Timer(15000, Solve(csrLuc:csrqtrs)),
+#              Timer(20000, Solve(csrZan:csrqtrs)),
+#              Timer(20000, Solve(csrGM3:csrqtrs)),
+#              Solve(csrFR:csrqtrs)
+#             )
+#csrqtrs = Repeat(0,*,Timer(2000, QTRSRRRPolo[Degree = 1, Range = 2, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT]))
+#   : Maybe(QTRSAAECCNOC[Limit = 1])
+#   : QTRSDependencyPairs
+#   : Maybe(QDPDependencyGraph)
+#   : Repeat(0,*,workOnDPs)
+
+
+
+# =============================================================== #
+# ==================== NEW CONTEXT SENSITIVE ==================== #
+# =============================================================== #
+
+csr = Repeat(0,*,
+        Any(
+          Timer(500, CSRRRR[Order=POLO[Engine=MINISAT, Range = 2, Degree = 1]]),
+          Timer(1000, CSRRRR[Order=PMatroNat[Collapse=True, Engine = MINISAT, Range = 1, Dimension = 2]]),
+          Timer(500, CSRRRR[Order=POLO[Engine=MINISAT, Range = 1, Degree = 1]])
+        )
+      ):
+      Any(
+        CSRNonTermination,
+        Maybe(CSRInnermost):
+        First(
+          Timer(35000,
+            Solve(qcsdp)
+          ),
+          Solve(csTransformations)
+        )
+      )
+
+csrLuc = CSRToQTRS[Transformation = Lucas]
+csrZan = CSRToQTRS[Transformation = Zantema]
+csrFR = CSRToQTRS[Transformation = ImprovedFerreiraRibeiro]
+csrGM1 = CSRToQTRS[Transformation = IncompleteGieslMiddeldorp]
+csrGM2 = CSRToQTRS[Transformation = CompleteGieslMiddeldorp]
+csrGM3 = CSRToQTRS[Transformation = InnermostGieslMiddeldorp]
+csrTRIV = CSRToQTRS[Transformation = Trivial]
+
+qcsdp = CSRToQCSDP:
+        Repeat(0,*,qcsStrategy):
+        qcsToQdp
+
+csTransformations = CSR06Heuristic
+
+csrTerm = Any(
+            Solve(csrZan:csrqtrs),
+            Solve(csrGM1:csrqtrs),
+            Solve(csrFR:csrqtrs),
+            Solve(csrTRIV:csrqtrs),
+            Solve(csrGM2:csrqtrs)
+          )
+
+csrInn = Any(
+           Solve(csrZan:csrqtrs),
+           Solve(csrGM3:csrqtrs),
+           Solve(csrTRIV:csrqtrs),
+           Solve(csrFR:csrqtrs)
+         )
+
+qcsStrategy = First(
+                QCSDependencyGraph,
+                qcsSubterm,
+                QCSUsableRules,
+                qcsSolver,
+                qcsPairTrans
+              )
+
+qcsPairTrans = First(
+                 QCSDPInstantiation,
+                 QCSDPForwardInstantiation,
+                 QCSDPNarrowing
+               )
+
+qcsSubterm = QCSDPSubterm[Engine=SAT4J]
+
+qcsSolver = First(
+              Timer(1000, QCSDPPoloRuleRemoval[Degree = 1, Mode = SEARCHSTRICT, Range = 2, MaxSimpleDegree = 5, Engine = MINISAT]),
+              Any(
+                Timer(10000, QCSDPNeededSymbols[Order = NEGPOLO[Range=2, PosConstantRange=2, NegConstantRange=-1, Restriction=2, NegRangeCriterion = DAMPEN, PartialDioEval = True, Engine=MINISAT]]),
+                Timer(5000, QCSDPNeededSymbols[Order = MMPOLO[StripExponents = True, Simplification = MAXIMUM, Heuristic = CSIF, SatConverter = PLAIN, Engine = MINISAT, Range = 1]]),
+                Timer(10000, QCSDPNeededSymbols[Order = GPOLORATSIMPLE[\
+                    Degree = 1, DenominatorRange = 4, NumeratorRange = 16, OPCSolver = MBYNTOFORMULA[FixDenominator = True, Solver = SAT[SatConverter = PLAIN[UseShifts=True, UseBinaryShifts=False, UnaryMode=CIRCUIT, NewUnaryPower=True], SatBackend = MINISAT, Simplification = MAXIMUM, SimplifyAll = True, StripExponents = False]], MaxSimpleDegree = -1, StrictMode = SEARCHSTRICT]]),
+               Timer(5000, QCSDPNeededSymbols[Order = RPOS[Quasi = True, Engine=MINISAT, AfsType=FULLAFS]]),
+               Timer(7000, QCSDPNeededSymbols[Order = POLO[Degree = 1, Range = 2, MaxSimpleDegree = 4, Engine = MINISAT], MergeMutual = True]),
+               Timer(2000, QCSDPNeededSymbols[Order = MATRO[Engine=MINISAT,Range = 1, Type = COLLAPSINGDPTUPLE[Size = 2, Filter = NOFILTER]], MergeMutual = True] )\
+               )
+             )
+
+qcsToQdp = QCSDPToQDP:qdp
+
+csrqtrs = Repeat(0,*,
+            Timer(2000, QTRSRRRPolo[Degree = 1, Range = 2, Autostrict = False, MaxSimpleDegree = 5, Engine = MINISAT])
+          ):
+          Maybe(QTRSAAECCNOC[Limit = 1]):
+          QTRSDependencyPairs:
+          Maybe(QDPDependencyGraph);
+          Repeat(0,*,workOnDPs)
+
+
+# =============================================== #
+# ==================== ITRS  ==================== #
+# =============================================== #
+
+# if there is nothing predefined in there, just use the QDP framework
+itrs = First(
+         ITRStoQTRS[Apply = CONSTONLY]:RunDefaultStrategyForObligation,
+         itrsToIdp:idpv2
+       )
+
+#itrsToIdpV2 = ITRSToIDPV2
+itrsToIdp = ITRSToIDP:
+            Maybe(IDPUsableRules):
+            Maybe(IDPCapGraph):
+            Maybe(idpGraphOp)
+
+
+# =============================================== #
+# ==================== IDPv1 ==================== #
+# =============================================== #
+
+#Only used by the JBC/LLVM people nowadays:
+idpv1 = First(
+             IDPtoQDP[Apply = CONSTONLY]:RunDefaultStrategyForObligation,
+             First(
+               Solve(
+                 Timer(12000, idpFast)
+               ),
+               AnyDelay(5000,
+                 Solve(idpSlow),
+                 Solve(IDPtoQDP[Apply = ALWAYSFILTER]:RunDefaultStrategyForObligation)
+               )
+             )
+           )
+
+idpSlow = Repeat(0,*,
+            Maybe(idpGraphOp):
+            AnyDelay(7000,
+              Timer(30000, idpNonInfFast),
+              idpNonInfSlow
+            )
+          )
+
+idpFast = Repeat(0,*,
+            Maybe(idpGraphOp):
+            idpNonInfIntFastFilter
+          )
+
+idpNonInfFull = Any(
+                  idpNonInfFast,
+                  idpNonInfSlow
+                )
+
+idpNonInfFast = Any(
+                  idpNonInfNatFast,
+                  idpNonInfIntFast
+                )
+
+idpNonInfSlow = AnyDelay(10000,
+                  Any(
+                    idpNonInfIntSlow,
+                    idpNonInfIntShapedLR,
+                    idpNonInfIntShapedLL
+                  ),
+                  First(
+                    idpNonInfIntVerySlow,
+                    Solve(IDPtoQDP[Apply = ALWAYSFILTER]:RunDefaultStrategyForObligation)
+                  )
+                )
+
+idpGraphOp = IDPDependencyGraph:Maybe(IDPUsableRules)
+idpNonInfNatFast = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = DEFAULT_SHAPE, Nat = True, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 1, MaxRightSteps = 1]]]]
+idpNonInfNatSlow = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = CAND1_SHAPE, Nat = True, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 3, MaxRightSteps = 1]]]]
+idpNonInfIntFast = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = DEFAULT_SHAPE, Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 1, MaxRightSteps = 1]]]]
+idpNonInfIntFastFilter = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = CAND1_SHAPE[MaxProjectionPos = False, MaxArithPos = False], Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxDegree = 1, MaxLeftSteps = 0, MaxRightSteps = 0, MinLeftSteps = 0, MinRightSteps = 0]]]]
+idpNonInfIntSlow = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = DEFAULT_SHAPE, Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 3, MaxRightSteps = 2]]]]
+idpNonInfIntVerySlow = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = DEFAULT_SHAPE, Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 8, MaxRightSteps = 1]]]]
+idpNonInfIntShapedLL = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = CAND1_SHAPE, Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 2, MaxRightSteps = 0]]]]
+idpNonInfIntShapedLR = IDPNonInf[Solver = GPOLO[PoloShapeHeuristic = CAND1_SHAPE, Nat = False, Degree = -1, OPCSolver = NATOPCSATSOLVER[Engine = MINISAT], ConstraintGenerator = NONINFCONSTRAINTS[PathGenerator = METRICPATHS[MaxLeftSteps = 2, MaxRightSteps = 1]]]]
+
+# =============================================== #
+# ==================== IDPv2 ==================== #
+# =============================================== #
+
+#Make idpv2 the default idp version:
+idp = idpv2
+
+# let the IDP framework enter first,
+# the QDP framework joins after some time
+
+idpv2 = Repeat(0,*,
+        Maybe(idpGraphOp):
+        AnyDelay(7000,
+          Timer(30000, idpNonInfFast),
+          Any(
+            idpNonInfSlow,
+            Delay(22000,
+              Solve(
+                IDPtoQDP[Apply = ALWAYS]:
+                RunDefaultStrategyForObligation
+              ) # Solve
+            ) # Delay
+          ) # Any
+        ) # AnyDelay
+      ) # Repeat
+
+idp2 = idp2Preprocessing:
+       idp2Loop
+
+idp2Preprocessing = Maybe(IDP2DupplicateArgsFilter):
+                    Maybe(IDP2ConstantArgsFilter):
+                    Maybe(IDP2LongNamesFilter):
+                    IDP2TypeInference:
+                    Maybe(IDP2SCC):
+                    Maybe(IDP2UsableRules):
+                    Maybe(idpv2PathCollapse):
+                    Maybe(idp2Bisimulation)
+
+idp2Loop = Maybe(IDP2KnowledgeGeneration):
+           Maybe(IDP2SCC):
+           Maybe(idp2Bisimulation):
+           Solve(
+             Maybe(idp2VarPartitioning);
+             IDPPolyIntInterpretationSwitch[Shapes = CONSTRUCTOR_SUM_LINEAR_SHAPE]:
+             Repeat(1,*,
+               Repeat(1,*,
+                 Maybe(
+                   IDP2SCC;
+                   Maybe(idpv2AfterEdgeDeletion)
+                 ):
+                 Maybe(
+                   First(
+                     IDP2KnowledgeGeneration:
+                     Maybe(idp2Bisimulation):
+                     Maybe(idpv2AfterEdgeDeletion),
+                     idpv2PathCollapse
+                   ) # First
+                 ): # Maybe
+                 Any(
+                   IDP2EmptyProblem,
+                   AnyDelay(5000,
+                     idpNonInf;
+                     Maybe(idpv2AfterEdgeDeletion),
+                     IDP2LoopUnroll:
+                     idpNonInf;
+                     Maybe(idpv2AfterEdgeDeletion),
+                     Solve(idp2ToQdp)
+                   ) # AnyDelay
+                 ) # Any
+               ) # Repeat
+             ) # Repeat
+           ) # Solve
+
+delayedFail = Delay(1000000, FAIL)
+
+idp2VarPartitioning = FAIL:
+                      IDP2VariablePartitioning[Mode = SINGLE_PARTITIONS]
+
+idp2Bisimulation = FAIL:
+                   IDP2DeepFSBisimulation
+
+idp2ToQdp = Maybe(IDP2ItpfScheduler[Strategy = PREPARE_QDP]):
+            Maybe(IDP2FreeVariablesFilter):
+            IDP2toQDP[Apply = CONSTONLY]:
+            RunDefaultStrategyForObligation
+
+#: QDPDumpChains[StartTerm = "47_1_MI(47_0_iL(pos(s(01())))", MaxPSteps = 5, MaxRSteps = -1]
+
+idpv2AfterEdgeDeletion = Maybe(IDP2UsableRules):
+                         idpv2PathCollapse:
+                         Maybe(idp2Bisimulation)
+
+idpv2PathCollapse = First(
+                      IDP2InfPaths[MaxEdgeGain = 2]:
+                      Maybe(IDP2RewritePaths[MaxEdgeGain = 2]):Maybe(IDP2UsableRules),
+                      IDP2RewritePaths[MaxEdgeGain = 2]:
+                      Maybe(IDP2UsableRules)
+                    )
+
+idpNonInf = IDP2NonInf[Solver = SAT_SMT_SOLVER]
+
+
+# =============================================== #
+# ===================== JBC ===================== #
+# =============================================== #
+
+
+#jbc = jbcTerm
+jbc = jbcComplexity
+
+jbcTerm = Any(
+            Solve(jbcAbstract),
+            Solve(jbcEval)
+          )
+
+jbcDebugGraph = JBCToTerminationGraph[TryNontermProofs=True, UseOnlyAbstractInstances=False]:
+                First(
+                  JBCNonTerm,
+                  Yes
+                )
+
+jbcEval = Timer(600,
+            JBCToTerminationGraph[FilterUnnecessaryWrites=False, TryNontermProofs=False, LoopMaximalIterations=2147483647, LoopMergeCostBase=0, LoopMergeCostChange=0, IncomingInstanceFinder=False, TryMerging=False, TrySeparateMethodAnalysis=False, TryParallelPathMerging=False, Multithreaded=False]
+          ):
+          TerminationGraphToSCC
+
+jbcAbstract = JBCToTerminationGraph[FilterUnnecessaryWrites=False, TryNontermProofs=True, HandleOverflows=False, UseOnlyAbstractInstances=False];jbcGraph
+
+jbcGraph = Any(
+                Solve(
+                  WallTimer(25000,
+                    JBCNonTerm
+                  )
+                ),
+                Solve(
+                  TerminationGraphToSCC[ApplyAnalyses = "aprove.Framework.Bytecode.Processors.ToSCC.UsedFieldsAnalysis aprove.Framework.Bytecode.Processors.ToSCC.MarkerFieldAnalysis"];
+                  jbcGraphSCC
+                )
+              )
+
+jbcGraphSCC = jbcGraphSCCIRS
+
+jbcGraphSCCFast = jbcGraphSCCIRS
+jbcGraphSCCSlow = jbcGraphSCCIDPv1
+jbcGraphSCCIDPv2 = TerminationSCCToIDPv2[CleanRules=False]:
+                   jbcIDPv2
+
+jbcGraphSCCIDPv1 = TerminationSCCToIDPv1[EncodeStaticFields=True, EncodeReferenceTypesAsTerms=True, EncodePathLength=False]:
+                   jbcIDPv1
+
+
+jbcGraphSCCIRS = TerminationSCCToIRS[EncodeStaticFields=True, EncodeArrayLengthSeparately=False, ApplyPathLength=False, TryQDPExport=True]:RunDefaultStrategyForObligation
+
+
+jbcIDPv2 = idp
+jbcIDPv1 = First(
+             IDPtoQDP[Apply = CONSTONLY]:RunDefaultStrategyForObligation,
+             First(
+               Solve(
+                 Timer(12000, idpFast)
+               ),
+               AnyDelay(5000,
+                 Solve(idpSlow),
+                 Solve(IDPtoQDP[Apply = ALWAYSFILTER]:RunDefaultStrategyForObligation)
+               )
+             )
+           )
+
+# =============================================== #
+# ============= JBC complexity ================== #
+# =============================================== #
+
+jbcComplexity = JBCToTerminationGraph[TryNontermProofs=False, UseOnlyAbstractInstances=False]
+    : TerminationGraphToComplexityRuleSet
+    #: JBCGraphEdgesToCpxIntTrs[ApplyPathLength = True,ApplyTermSize=False, TryQDPExport=False]
+    : JBCGraphEdgesToIntCompl[ApplyPathLength = False,ApplyTermSize=False, TryQDPExport=True]
+    : First(cint,cdt)
+    #: Maybe(External[Call="/home/fab/export.sh"])
+
+# =============================================== #
+# ===================== CINT ==================== #
+# =============================================== #
+#cint = cintCleanup : Repeat(cintRedPair : cintCleanup) # : cintDesperate : cintCleanup : Repeat(cintRedPair : cintCleanup)
+cint = CpxIntTrsToKoAT[Filename="./test.koat"]
+
+cintCleanup
+    = Repeat(0,*,
+        First(
+            CpxIntTrsKnowledge,
+            CpxIntTrsLeafRemoval,
+            CpxIntTrsRemoveUnreachable,
+            CpxIntTrsRhsSimplification,
+            Repeat(1,*,CpxIntTrsChainingProcessor),
+            CpxIntTrsUnsatisfiableConstraintProcessor
+        )
+    )
+
+cintRedPair = First(
+    CpxIntTrsRedPair[Shape = ShapeConstant],
+    CpxIntTrsRedPair[Shape = ShapeConstant, UseSizeBounds = True],
+	CpxIntTrsRedPair[Shape = ShapeLinear],
+	CpxIntTrsRedPair[Shape = ShapeLinear, UseSizeBounds = True]
+)
+
+#cintRedPair = First(
+#    CpxIntTrsRedPair[Shape = ShapeLinear],
+#    CpxIntTrsRedPair[Shape = ShapeQuadraticNotMixed],
+#    CpxIntTrsRedPair[Shape = ShapeQuadraticMixed],
+#    CpxIntTrsRedPair[Shape = ShapeCubicNotMixed],
+#    CpxIntTrsRedPair[Shape = ShapeCubicMixedQuadratic],
+#    CpxIntTrsRedPair[Shape = ShapeCubicMixed]
+#)
+
+cintDesperate =
+	CpxIntTrsChainingProcessor[MaximalFanOut = 2, AllowHarmful = True]
+
+# =============================================== #
+# ====================== T2 ===================== #
+# =============================================== #
+
+t2Sys = T2IntSysToIntTRS
+       :Maybe(IntTRSCompressor)
+       :Maybe(IntTRSUnneededArgumentFilter)
+       :Maybe(Timer(15000, AddInterprocInvariants))
+       :RunDefaultStrategyForObligation
+
+# =============================================== #
+# ==================== IRSwT ==================== #
+# =============================================== #
+
+#Clean, then check if this is pure IRS or QDP, go to specific substrategies then.
+#Otherwise, start normal reduction loop:
+irswt = Maybe(IRSwTFormatTransformer):irswtMainLoop
+
+irswtMainLoop =
+     irswtCleanup;
+     First(
+           Solve(IRSwTRemoveTerms[NoSuccIfChanged=True]:irs),
+           Solve(IRSwTRemoveInts[NoSuccIfChanged=True]:IRSwTToQDP:RunDefaultStrategyForObligation),
+           Repeat(1,*,irswtOrders;irswtCleanup),
+           Any(
+                Solve(IRSwTChaining[Mode=SINGLE_RULE]:irswtMainLoop),
+                Fail:Solve(IRSwTToIntTRS:irs)
+           )
+     ) # First
+
+irswtTest = IRSwTTreeTraces
+
+irswtCleanup =  Maybe(IRSwTTerminationDigraph)
+               ;Maybe(IntTRSCompressor)
+               ;Maybe(IntTRSUnneededArgumentFilter)
+
+irswtOrders =
+    First(
+         IRSwTTempRemoveTerms[Time=5000, Strategy="irswtIRSRuleRemoval", FilterFreeVariables=False],
+         IRSwTTempRemoveInts[Time=5000, Strategy="irswtQDPRuleRemoval", FilterFreeVariables=True],
+         IRSwTTrace,
+         IRSwTOrder[OrderType=INTERPRETATION]
+    ) # First
+
+irswtIRSRuleRemoval = Repeat(1,*,First(irsJointSimple, irsJointComplex))
+irswtQDPRuleRemoval = IRSwTToQDP:Repeat(1,*,First(solver1, solver2))
+
+# =============================================== #
+# ===================== IRS ===================== #
+# =============================================== #
+
+irs =
+	irsCleanupCrew:
+         Any(IntTRSNonPeriodicNonterm,
+                IntTRSPeriodicNonterm,
+                irsRedStrategy
+            ) # Any
+
+irsCleanupCrew = Maybe(IntTRSTerminationGraphProcessor[UseChaining=False, UseConstraintTransformation=False])
+                   ;Maybe(IntTRSCompressor)
+                   ;Maybe(IntTRSUnneededArgumentFilter)
+
+irsRedStrategy =
+               Any(
+                Solve(
+                  Any(
+                    Timer(5000, irsJointSimple),
+                    Timer(7500, irsJointComplex),
+                    IntTRSTerminationGraphProcessor[UseChaining=True]
+                     ) # Any
+                  ;irs
+                     ) # Solve
+                ,Solve(
+                  IntTRSCaseAnalysis[Mode=DEFAULT];irs
+                      ) # Solve
+                ) # Any
+
+irsJointSimple = Any(
+                      RankingReductionPairProcessor[GenerateFollowingInequalities=False],
+                      IntTRSPolynomialOrderProcessor[Degree=1]
+                    )
+
+irsJointComplex = Any(
+                       RankingReductionPairProcessor[GenerateFollowingInequalities=True],
+                       IntTRSPolynomialOrderProcessor[Degree=2, FactorBinomials=True]
+                     )
+
+irsTransitionInvariantStrategy = Maybe(IntTRSTerminationGraphProcessor[UseChaining=False]):RankingProcessor
+
+jbcGraphSCCMCNP = TerminationSCCToIDPv1:Solve(IDPToMCS[];mcs)
+
+# =============================================== #
+# ==================== LLVM  ==================== #
+# =============================================== #
+
+llvm = LLVMToTerminationGraph:
+       LLVMTerminationGraphToSCC;
+       Any(
+         Solve(
+           LLVMTerminationSCCToITRS:
+           Maybe(ITRSDuplicateArgsRemover):
+           Maybe(ITRSGroundTermRemover):
+           Maybe(ITRSUnneededArgumentRemover):
+           llvmitrs
+         ),
+         Solve(
+           LLVMTerminationSCCToKITTeL:
+           RunDefaultStrategyForObligation
+         )
+       )
+
+llvmitrs = ITRSToIDP:RunDefaultStrategyForObligation
+
+# ================================================ #
+# ==================== PATRS  ==================== #
+# ================================================ #
+
+patrs = Maybe(PATRSUnsat):
+        Maybe(PATRSReducible):
+        PATRSDP:
+        Repeat(0, *, PADPReducing):
+        Repeat(0, *, patrsScc)
+
+patrsScc = First(
+             PADPEDG,
+             PADPSubterm,
+             patrsOrders,
+             PADPFilter,
+             PADPPairNarrowing:Maybe(PADPUnsat)
+           )
+
+patrsOrders = First(
+                patrsPolo1,
+                patrsPolo2,
+                patrsPolo3,
+                patrsPolo4,
+                patrsPolo5,
+                patrsPolo6
+              )
+
+patrsPolo1 = First(
+               PADPPolo[Range = 1, NoIntDependence = True],
+               PADPPlainPolo[Range = 1, Monotonic = False]
+             )
+
+patrsPolo2 = First(
+               PADPMonotonicPolo[Range = 1, NoIntDependence = True],
+               PADPPlainPolo[Range = 1, Monotonic = True]
+             )
+
+patrsPolo3 = First(
+               PADPPolo[Range = 1, NoIntDependence = False],
+               PADPPlainPolo[Range = 2, Monotonic = False]
+             )
+
+patrsPolo4 = First(
+               PADPMonotonicPolo[Range = 1, NoIntDependence = False],
+               PADPPlainPolo[Range = 2, Monotonic = True]
+             )
+
+patrsPolo5 = PADPPolo[Range = 2, NoIntDependence = True]
+
+patrsPolo6 = PADPPolo[Range = 2, NoIntDependence = False]
+
+
+# ================================================== #
+# ==================== CSPATRS  ==================== #
+# ================================================== #
+
+cspatrs = Maybe(CSPATRSUnsat):
+          Maybe(CSPATRSReducible):
+          CSPATRSDP:
+          Repeat(0, *, cspatrsScc)
+
+cspatrsScc = First(
+               CSPADPEDG,
+               CSPADPSubterm,
+               cspatrsOrders,
+               CSPADPFilter
+             )
+
+cspatrsOrders = First(
+                  cspatrsPolo1,
+                  cspatrsPolo2,
+                  cspatrsPolo3,
+                  cspatrsPolo4,
+                  cspatrsPolo5,
+                  cspatrsPolo6
+                )
+
+cspatrsPolo1 = First(
+                 CSPADPPolo[Range = 1, NoIntDependence = True],
+                 CSPADPPlainPolo[Range = 1, Monotonic = False]
+               )
+
+cspatrsPolo2 = First(
+                 CSPADPMonotonicPolo[Range = 1, NoIntDependence = True],
+                 CSPADPPlainPolo[Range = 1, Monotonic = True]
+               )
+
+cspatrsPolo3 = First(
+                 CSPADPPolo[Range = 1, NoIntDependence = False],
+                 CSPADPPlainPolo[Range = 2, Monotonic = False]
+               )
+
+cspatrsPolo4 = First(
+                 CSPADPMonotonicPolo[Range = 1, NoIntDependence = False],
+                 CSPADPPlainPolo[Range = 2, Monotonic = True]
+               )
+
+cspatrsPolo5 = CSPADPPolo[Range = 2, NoIntDependence = True]
+
+cspatrsPolo6 = CSPADPPolo[Range = 2, NoIntDependence = False]
+
+
+# ================================================================ #
+# ==================== INDIVIDUAL PROCESSORS  ==================== #
+# ================================================================ #
+
+depgraph = QDPDependencyGraph
+
+
+# ================================================== #
+# ==================== UTILITY  ==================== #
+# ================================================== #
+
+fail = Fail
+
+
+# ======================================================== #
+# ==================== THEOREM PROVER ==================== #
+# ======================================================== #
+
+thm = WallTimer(3000,Solve(thmprover))
+
+thmShort = WallTimer(1200,Solve(thmprover))
+
+thmprover = Repeat(0,*,
+              First(
+                Solve(
+                  LemmaApplication[MinimalHeuristic = 1, Mode = OLD]:
+                  thmprover
+                ),
+                SymbolicEvaluation,
+                Solve(
+                  ConditionalEvaluation:
+                  thmprover
+                ),
+                Solve(
+                  CaseAnalysis:
+                  thmprover
+                ),
+                Solve(
+                  HypothesisLifting:
+                  thmprover
+                ),
+                Solve(
+                  InverseSubstitution:
+                  thmprover
+                ),
+                INDFMLHeuristic[Techniques = Both, UseCoverSets = True, Merging = True, SkipLAHypothesisHeuristic = False, EvaluateHypothesis = True, LooseRestrictions = False]
+              )
+            )
+
+
+# ================================================================= #
+# ==================== MONOTONICITY CONSTRAINT ==================== #
+# ====================    TRANSITION SYSTEM    ==================== #
+# ================================================================= #
+
+mcs = First(MCSMCNP, MCSToITRS:itrs)
+
+
+# ============================================================ #
+# ==================== RUNTIME COMPLEXITY ==================== #
+# ============================================================ #
+
+declare NATTOFORMULA = aprove.DPFramework.Orders.Utility.GPOLO.OPCSolvers.NATtoFormula
+     defaults [Solver = SAT[SatBackend = MiniSAT]]
+
+
+runtimecomplexity
+    = AnyDelay(45000,
+        CpxTrsToCdt : cdt,
+        CpxTrsMatchBounds,
+        CpxTrsMatchBoundsTA[STAS = RC_DEFSPLIT, CRS = MYCRS2, MAX_CONFLICTS_TO_RESOLVE = 100000, MAX_TRANSITIONS_OF_A = 200000, MAX_STATES_OF_A = 140000]
+      )
+
+cdt = cdtCleanup : cdtSolve
+
+cdtCleanup = Maybe(CdtUnreachable):
+             Maybe(CdtRhsSimplification):
+             Maybe(CdtGraphSplitRhs):
+             Maybe(CdtLeafRemoval):
+             Maybe(CdtKnowledge)
+
+cdtSolve = Repeat(0, *,
+             AnyDelay(6000,
+                 cdtRedPair,
+                 First(cdtTransform, cdtMatroRedPair)
+             )
+           )
+
+cdtRedPair = Any(
+               CdtPolyRedPair[OPCSolver = NATTOFORMULA, Range = 5, Degree = 1],
+               CdtPolyRedPair[OPCSolver = NATTOFORMULA, Range = 3, Degree = 2],
+               CdtPolyRedPair[OPCSolver = NATTOFORMULA, Range = 1, Degree = 3]
+             ):
+             Maybe(CdtKnowledge)
+
+cdtMatroRedPair = Any(
+                    CdtMatrixRedPair[Engine = MINISAT, Range = 4, Dimension = 2],
+                    CdtMatrixRedPair[Engine = MINISAT, Range = 3, Dimension = 3]
+                  ):
+                  Maybe(CdtKnowledge)
+
+cdtTransform = First(
+                 cdtNarrowing,
+                 Any(
+                   CdtRewriting,
+                   CdtInstantiation,
+                   CdtForwardInstantiation
+                 )
+               ):
+#    = Any(CdtInstantiation, CdtForwardInstantiation, cdtNarrowing, CdtRewriting)
+               Maybe(cdtCleanup)
+
+cdtNarrowing = CdtNarrowing[NormalCheck = True, StrongSubsumes = True]
+
+
+cpxreltrs = CpxRelTrsToCDT : cdtCleanup : cdtSolve
+
+# ============================================================ #
+# ============================ CIDT ========================== #
+# ============================================================ #
+
+cidt = CIdtTypeInference : Maybe(cidtKnowledgeGeneration) : Maybe(CIdtPathCollapse) : cidtCleanup : Maybe(cidtDeleteFalse) : AnyDelay(500, cidtConst, cidtLinear, cidtQuadratic)
+
+cidtConst = Maybe(CIdtPathCollapse[CollapseSSelfLoops = 1]) : cidtDeleteFalse : cidtConst
+
+cidtLinear = CIdtPolyInterpretationSwitch[Shapes = COMPLEXITY_CONSTRUCTORS_LINEAR_SHAPE, ReplaceExisting = TRUE]
+          : cidtKnowledgeGeneration : cidtCleanup : cidtSolve
+
+cidtQuadratic = CIdtPolyInterpretationSwitch[Shapes = COMPLEXITY_CONSTRUCTORS_QUADRATIC_SHAPE, ReplaceExisting = TRUE]
+          : cidtKnowledgeGeneration : cidtCleanup : cidtSolve
+
+cidtDeleteFalse = CIdtCNDGraph[Strategy = CND_ProveFalseStrategy, GraphStrategy = DELETE_OR_DO_NOT_CHANGE] : cidtCleanup
+
+cidtSolve =  First(Maybe(CIdtNodeSplit) : cidtIntRedPairSolve, CIdtPathCollapse[CollapseSSelfLoops = 1] : Maybe(CIdtNodeSplit) : cidtIntRedPairSolve)
+
+cidtCleanup =  Maybe(CIdtLeafRemoval) : Maybe(CIdtUsableRules)
+
+cidtKnowledgePropagation = Maybe(CIdtKnowledgePropagation)
+
+cidtKnowledgeGeneration = Maybe(CIdtCNDGraph[Strategy = CND_KNOWLEDGE_GENERATION])
+
+cidtIntRedPairSolve = CIdtPolyIntRedPair[Solver = SAT_SOLVER, All_strict_and_bounded = FALSE, RANGE_MIN = -3, RANGE_MAX = 3] : cidtKnowledgePropagation : cidtCleanup : cidtIntRedPairSolve

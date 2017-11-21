@@ -1,0 +1,6 @@
+(VAR x y)
+(RULES
+  ack(0, x) -> S(x)
+  ack(S(y), 0) -> ack(y, S(0))
+  ack(S(y), S(x)) -> ack(y, ack(S(y), x))
+)

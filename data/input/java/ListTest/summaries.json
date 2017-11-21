@@ -1,0 +1,133 @@
+{
+    "summaries": [
+        {
+            "class": "LinkedList",
+            "methods": [
+                {
+                    "name": "<init>",
+                    "descriptor": "()V",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },          
+                {
+                    "name": "<init>",
+                    "descriptor": "(I)V",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },                
+                {
+                    "name": "append",
+                    "descriptor": "(I)LLinkedList;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "this",
+                        "lowerSpace": "0",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "this + arg0 + 1"
+                        },
+                        {
+                            "pos": "ret",
+                            "bound": "this + arg0 + 1"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },                
+                {
+                    "name": "find",
+                    "descriptor": "(I)LLinkedList;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "this",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                    ],
+                    "modifies": [],
+                },
+                {
+                    "name": "setMe",
+                    "descriptor": "(I)V",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "this",
+                            "bound": "this + arg0"
+                        },
+                    ],
+                    "modifies": ["this",],
+                },              
+            ]
+        }
+    ]
+}

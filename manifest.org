@@ -1,0 +1,17 @@
+=Contents / Layout of the CAGE repository=
+
+* data
+** input
+   Input to portions (or the whole) of the CAGE system. Term rewriting systems,
+   java programs, SMT solver inputs, and so on.  Portions of these inputs will
+   be programs, so it makes sense to keep the inputs under version control
+
+* doc
+  More formal documentation of the system
+
+* scripts
+  Useful shell scripts related to CAGE
+
+* src
+  Actual source code related to our deliverable
+

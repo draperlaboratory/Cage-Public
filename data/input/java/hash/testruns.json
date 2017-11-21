@@ -1,0 +1,30 @@
+{
+    "jar": "Hash.jar",
+    "runs": [
+        {
+            "id": "Hash",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "timeout": 0
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 0
+                        },
+                        "real": "n^2",
+                        "expected": {
+                            "bound": "n^2",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

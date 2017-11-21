@@ -1,0 +1,93 @@
+{
+    "summaries": [
+        {
+            "class": "java.util.Iterator",
+            "methods": [
+                {
+                    "name": "hasNext",
+                    "descriptor": "()Z",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "lowerSpace": "0",
+                        "upperSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                    "modifies": [],
+                },
+                {
+                    "name": "next",
+                    "descriptor": "()Ljava/lang/Object;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "1",
+                        "upperSpace": "0",
+                        "lowerSpace": "0"
+                    },
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "0"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "0"
+                        },
+                    ],
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "this"
+                        },
+                        {
+                            "pos": "this",
+                            "bound": "-1 + 1 * this"
+                        },
+                    ],
+                    "modifies": ["this"],
+                },
+            ],
+        },
+        {
+            "class": "IteratorExample",
+            "methods": [
+                {
+                    "name": "getIterator",
+                    "descriptor": "()Ljava/util/Iterator;",
+                    "static": false,
+                    "complexity": {
+                        "lowerTime": "1",
+                        "upperTime": "env + 1",
+                        "lowerSpace": "1",
+                        "upperSpace": "env + 1"
+                    },
+                    "upperSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "env"
+                        },
+                    ],
+                    "lowerSize": [
+                        {
+                            "pos": "ret",
+                            "bound": "1"
+                        },
+                    ],
+                },
+            ],
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+===== AProVE command line flags =====
+
+-a (termination|complexity) to choose the goal of the analysis; currently, this does not work for JBC
+-v for the logging level
+-p (html|plain|cpf) for the format of the proof-output (plain means plain text, cpf is for certification)
+-m wst to get a YES, NO or MAYBE as aprove's very first output
+-s PATH_TO_STRATEGY to use a custom strategy
+-t TIMEOUT
+-w NUM_THREADS to specify the number of threads
+-q to specify a query; example: java -ea -jar aprove.jar -q "List.main([Ljava/lang/String;)V|cS;sSA;c0" List.jar
+
+   The first part (up to the "|") is the method to analyze in the JVMS-notation (see here:
+   docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3). So in the example above, the main-method of the
+   class List would be analyzed.  The second part is a ;-separated list that describes the properties of static fields
+   and arguments. The following list elements are possible:
+
+   cS - static fields may be cyclic
+   nS - static fields may be non-tree shaped
+   sSS - static fields may share with each other
+   sSA - static fields may share with everything
+   ci - i-th argument may be cyclic
+   ni - i-th argument may be non-tree shaped
+   sij - i-th and j-th argument may share
+
+   So in the example, static fields may point to possibly cyclic objects that may share with everything and the first
+   (and only) argument may be cyclic, too.
+
+
+===== Configuring the JBC-Analysis =====
+
+Most aspects of the analysis of Java Bytecode which are relevant for our purposes are now configurable from the command-line.
+They can be configured with the following command-line argument:
+
+-O java::key=value
+
+Type
+
+-O java::help
+
+to see a list of all avilable options with explanations.
+
+Since providing the same arguments on the command line over and over again is annoying, there's the option
+
+-O java::config_file=$PATH_TO_CONFIG_FILE
+
+which allows you to configure all available options using a configuration file.
+
+
+===== Get the SE-graph/Integer-TRS =====
+
+Call java -ea -cp aprove.jar aprove.CommandLineInterface.JBCFrontendMain. The options should be pretty
+self-explanatory. Dumping the Integer-TRS resp. CTRS is the default (no additional options needed). With "-Q no", you
+always get the Integer-TRS (even if there are no integers at all).

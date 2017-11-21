@@ -1,0 +1,36 @@
+{
+    "jar": "DoublyLinkedList.jar",
+    "runs": [
+        {
+            "id": "doublyLinkedList",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "real": "n^2",
+                    "upper": {
+                        "config": {
+                        },
+                        "expected": {
+                            "bound": "n^3",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

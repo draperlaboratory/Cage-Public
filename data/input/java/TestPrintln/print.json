@@ -1,0 +1,29 @@
+[{
+"class": "java.io.PrintStream",
+"functions": [
+{
+"name": "println",
+"descriptor": "(I)V",
+"args": ["this", "arg1"],
+"complexity": {
+"upperTime": "arg1",
+"upperSpace": "1"
+},
+},
+],
+},
+ {
+"class": "java.io.PrintStream",
+"functions": [
+{
+"name": "println",
+"descriptor": "(Ljava/lang/String;)V",
+"args": ["this", "arg1"],
+"complexity": {
+"upperTime": "arg1",
+"upperSpace": "1"
+},
+},
+],
+}
+]

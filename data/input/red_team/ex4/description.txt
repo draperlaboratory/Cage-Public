@@ -1,0 +1,19 @@
+Delimiter Search Function
+=========================
+
+This program searches a text file for the first occurence of a characters contained within a set of 
+delimiter characters specified in another (delimiter) file. The character set is assumed to be the
+(103 character) "Portable Character Set", based upon the locale being set as POSIX.
+
+The Challenge Program is executed as follows:
+
+    $ java -cp /home/challenge_program/delimsearch_1.jar com.cyberpointllc.stac.host.Main <text file> <delimiter file>
+    (see ./example/example.sh)
+
+The arguments are as follows:
+
+1. <text file>       Name of file to be searched
+
+2. <delimiter file>  Name of file containing set of delimiters to be searched for
+
+The program will output the index of the first delimiter found in the text file.

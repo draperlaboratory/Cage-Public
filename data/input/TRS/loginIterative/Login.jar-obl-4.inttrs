@@ -1,0 +1,2 @@
+f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x0)))), x1, x0, x2, x0) -> f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x0)))), x1, x0, x2 + 1, x0) [ x2 + -1 * x0 <= -1 /\ x3 + -1 * x1 >= 1 ]
+f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x)))), x4, x, x5, x) -> f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x)))), x4, x, x5 + 1, x) [ x5 + -1 * x <= -1 /\ x6 + -1 * x4 <= -1 ]

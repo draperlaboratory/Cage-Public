@@ -1,0 +1,27 @@
+Challenge Program:
+
+    pwcheck.jar
+
+Challenge Question:
+
+    Does the Challenge Program contain any vulnerability that would allow
+    for the password stored in the password file to be extracted (without 
+    directly looking at the password file) solely by measuring the time 
+    response of repeated queries to the the pwcheck program?  
+
+Additional background for question:
+
+    It may be assumed that the secret contained within the password file
+    consists of a password of 5..30 UTF-8 encoded UNICODE charactes from following subset:
+    [a..z|A..Z|0..9]
+
+Available Operations:
+
+    Passive Observations: None
+    Active Interactions:  Run Challenge Program once (1)
+
+Operational Budget:
+
+    Max number of operations : 10000
+    Probability of success   : 99%
+

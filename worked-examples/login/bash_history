@@ -1,0 +1,5 @@
+aprove Login.jar
+cp /var/tmp/aprove524341578314307731.koat Login.koat
+koat.native Login.koat
+detectLeak --its Login.koat --annot LoginSafe.annot
+detectLeak --its Login.koat --annot LoginLeaks.annot

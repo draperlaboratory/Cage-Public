@@ -1,0 +1,283 @@
+{
+    "jar": "Lambdas.jar",
+    "runs": [
+        {
+            "id": "Lambdas simpleLambdaLoop",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Lambdas.simpleLambdaLoop(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas lambdaLoopWithClosure",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Lambdas.lambdaLoopWithClosure(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas apiLambdaLoopWithImportantClosure",
+            "enabled": {
+                "value": false,
+                "justification": "https://github.com/draperlaboratory/cage-koat/issues/28"
+            },
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Lambdas.apiLambdaLoopWithImportantClosure(II)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas apiLambda",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Lambdas.apiLambda(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas twoArgsLambdaLoop",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Lambdas.twoArgsLambdaLoop(ILjava/lang/Object;)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas lambdaLoopWithTwoArgsClosure",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES",
+                        "dont_expand_type_tree": true
+                    },
+                    "query": "Lambdas.lambdaLoopWithTwoArgsClosure(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas constructor",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES",
+                        "dont_expand_type_tree": true
+                    },
+                    "query": "Lambdas.constructor(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas instanceMethodRef",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES",
+                        "dont_expand_type_tree": true
+                    },
+                    "query": "Lambdas.instanceMethodRef(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Lambdas staticMethodRef",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES",
+                        "dont_expand_type_tree": true
+                    },
+                    "query": "Lambdas.staticMethodRef(I)V",
+                    "rt_version": 8,
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        },
+    ]
+}

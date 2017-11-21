@@ -1,0 +1,26 @@
+{
+    "jar": "Fib.jar",
+    "runs": [
+        {
+            "id": "fibExp",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Fib.call(I)V",
+                }
+            },
+            "backend": {
+                "time": {
+                    "real": "EXP",
+                    "upper": {
+                        "expected": {
+                            "bound": "EXP"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

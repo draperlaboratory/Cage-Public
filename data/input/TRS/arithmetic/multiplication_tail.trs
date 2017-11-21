@@ -1,0 +1,10 @@
+(COMMENT TcT gives O(n) complexity!)
+(COMMENT TcT gives O(n^2) complexity with matrix orderings)
+(VAR x y)
+(GOAL COMPLEXITY)
+(RULES
+ add(x, 0) -> x
+ add(x, S(y)) -> add(S(x),y)
+ mult(x,0,z) -> z
+ mult(x,S(y),z) -> mult(x,y,add(x,z))
+)

@@ -1,0 +1,34 @@
+{
+    "jar": ".jar",
+    "runs": [
+        {
+            "id": "",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "path_to_method_summaries": "summaries.json",
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "IteratorExample.iterate(Ljava/util/Iterator;)V"
+                },
+                "expected": {
+                    "timeout": true
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                            "timeout": true,
+                            "justification": "the default summary used for recursive methods is not sound since it assumes constant runtime",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

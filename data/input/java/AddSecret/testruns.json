@@ -1,0 +1,28 @@
+{
+    "jar": "AddSecret.jar",
+    "runs": [
+        {
+            "id": "AddSecret",
+            "frontend": {
+                "config": {
+                    "query": "AddSecret.countDown(I)V",
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "real": "n",
+                    "upper": {
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

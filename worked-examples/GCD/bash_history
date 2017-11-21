@@ -1,0 +1,4 @@
+aprove GCD.jar
+cp /var/tmp/aprove7158381947906473783.koat GCD.koat
+koat.native GCD.koat
+detectLeak --its GCD.koat --annot GCD.annot

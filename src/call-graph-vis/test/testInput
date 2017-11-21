@@ -1,0 +1,11 @@
+C:FastExpBigInt java.math.BigInteger
+C:FastExpBigInt FastExpBigInt
+C:FastExpBigInt java.lang.Object
+C:FastExpBigInt java.lang.System
+C:FastExpBigInt java.io.PrintStream
+M:FastExpBigInt:<init> (O)java.lang.Object:<init>
+M:FastExpBigInt:main (O)java.math.BigInteger:<init>
+M:FastExpBigInt:main (O)java.math.BigInteger:<init>
+M:FastExpBigInt:main (M)java.math.BigInteger:modPow
+M:FastExpBigInt:main (M)java.io.PrintStream:println
+M:FastExpBigInt:<clinit> (O)java.math.BigInteger:<init>

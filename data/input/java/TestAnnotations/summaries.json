@@ -1,0 +1,37 @@
+{
+    "summaries": [
+        {
+            "class": "TestAnnotations",
+            "methods": [
+                {
+                    "name": "innerLoop",
+                    "descriptor": "(II)V",
+                    "static": true,
+                    "complexity": {
+                        "upperTime": "arg1",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                    ],
+                    "upperSize": [
+                    ],
+                    "modifies": [],
+                },
+                {
+                    "name": "outerLoop",
+                    "descriptor": "(II)V",
+                    "static": true,
+                    "complexity": {
+                        "upperTime": "arg0 * arg1 + arg0",
+                        "upperSpace": "1"
+                    },
+                    "lowerSize": [
+                    ],
+                    "upperSize": [
+                    ],
+                    "modifies": [],
+                },
+            ],
+        },
+    ]
+}

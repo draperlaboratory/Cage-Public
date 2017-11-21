@@ -1,0 +1,8 @@
+(VAR x y)
+(RULES
+ add(x, 0) -> x
+ add(x, S(y)) -> S(add(x,y))
+ fib(0) -> S(0)
+ fib(S(0)) -> S(0)
+ fib(S(S(x))) -> add(fib(S(x)), fib(x))
+)

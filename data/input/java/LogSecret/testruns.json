@@ -1,0 +1,50 @@
+{
+    "jar": "LogSecret.jar",
+    "runs": [
+        {
+            "id": "LogSecret /w ClassInit",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                    },
+                },
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "LogSecret /wo ClassInit",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                },
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "real": "n",
+                        "expected": {
+                            "timeout": true,
+                            "bound": "INFINITE",
+                            "justification": "constant set in class intializer is relevant for termination behaviour",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

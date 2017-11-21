@@ -1,0 +1,34 @@
+[
+{
+    "class": "util.ModLinearHash",
+    "functions": [
+	{
+	    "name": "getHash",
+	    "descriptor": "()J",
+	    "args": ["this"],
+	    "complexity": {
+		"upperSize": "env + this",
+		"lowerSize": "0",
+		"upperTime": "this",
+		"upperSpace": "this"
+	    },
+	},
+    ],
+},
+    {
+    "class": "util.HashTable$Entry",
+    "functions": [
+	{
+	    "name": "equals",
+	    "descriptor": "(Ljava/lang/Object;)Z",
+	    "args": ["this", "obj"],
+	    "complexity": {
+		"upperSize": "1",
+		"lowerSize": "0",
+		"upperTime": "this + obj",
+		"upperSpace": "this + obj"
+	    },
+	},
+    ],
+}
+]

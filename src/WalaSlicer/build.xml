@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <project basedir="." default="build" name="WalaSlicer">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <property name="cage" location="../.."/>
+    <property name="tools" value="${cage}/tools"/>
+    <property name="wala.core.jar" value="${tools}/com.ibm.wala.core-1.3.10-SNAPSHOT.jar" />
+    <property name="wala.core.tests.jar" value="${tools}/com.ibm.wala.core.tests-1.3.10-SNAPSHOT.jar" />
+    <property name="wala.shrike.jar" value="${tools}/com.ibm.wala.shrike-1.3.10-SNAPSHOT.jar" />
+    <property name="wala.util.jar" value="${tools}/com.ibm.wala.util-1.3.10-SNAPSHOT.jar" />
+    <path id="WalaSlicer.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="${wala.core.jar}"/>
+        <pathelement location="${wala.core.tests.jar}"/>
+        <pathelement location="${wala.shrike.jar}"/>
+        <pathelement location="${wala.util.jar}"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+        <delete file="WalaSlicer.jar"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-project" name="build"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="WalaSlicer.classpath"/>
+        </javac>
+    </target>
+    <target name="dist" depends="build">
+      <jar jarfile="WalaSlicer.jar" basedir="bin" includes="**" update="false">
+        <fileset dir="bin" includes="**"/>
+        <manifest>
+      	  <attribute name="Main-Class" value="com.draper.cage.wala.WalaSlicer"/>
+          <attribute name="Class-Path"
+                     value="${wala.core.jar}
+                            ${wala.core.tests.jar}
+                            ${wala.shrike.jar}
+                            ${wala.util.jar}"
+          />
+        </manifest>
+      </jar>
+  </target>
+</project>

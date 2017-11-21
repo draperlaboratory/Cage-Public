@@ -1,0 +1,109 @@
+\documentclass{article}
+
+\author{Jordan T. Thayer}
+
+\begin{document}
+
+\begin{abstract}
+  A collection of notes on the possibility of parallelizing CAGE systems.  Since
+  we don't know an awful lot about the engagement environment, we instead
+  highlight potential places where parallelism could be taken advantage of, and
+  provide some high level descriptions of how we could take advantage of these
+  opportunities given deployments of varying scales (1, 10s, 100s).
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Difficulties}
+\subsection{Human in the Loop}
+  CAGE is envisioned as a collaboration between an automated system and a human
+  using that system as a tool to verifiy properties of a program.  In a certain
+  sense, it can be thought of as a dialogue between an individual or a team of
+  individuals and an expert system acting as a toolset. Sometimes the tool can
+  answer a problem exactly, but more often it will be able to point to potential
+  issues which should be checked for false positives, or the tool will require
+  additional input from humans (e.g. annotations to the java bytecode to aid in
+  complexity analysis).
+
+  This is difficult for three major reasons.  First, humans and computers act at
+  very different time scales, and both can actually act as a bottleneck to the
+  other. Secondly, humans and computers speak vastly different languages.
+  Finally, building a shared representation of world state, where by world state
+  we mean the state of all in-progress solving processes, and the agreed upon
+  features of all aspects of the problem to be solved, is extremely difficult,
+  if not altogether impossible.
+
+\subsection{Erroneous Output}
+  Sometimes the solvers are wrong. They might report, for example, that a method
+  has worst case complexity of $O(n^3)$, while it in fact has worst case
+  complexity of $O(n^2 \cdot log n)$.  While, techniaclly, $O(n^3)$ encompasses
+  the latter, we really want tight worst case complexity bounds, and the first
+  answer, while technically correct, isn't what we were looking for.
+
+  The problem with that is that this wrongness compounds as the solving process
+  goes forward.  As bounds relax further and further as the solving process goes
+  on, we run the risk of getting a flood of false positives.  Once we discover
+  the source of the relaxation, we have to go back and rework all of the results
+  whichi were influenced by that, which is more or less just taint analysis.
+  Unfortunately, parallelism works against us here; we can get more work done
+  per unit time, so we can taint more artefacts with a bad piece of information
+  before we catch it than we would be able to in a sequential setting.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Opportunities for Parallelism}
+
+\subsection{Multiple Problems}
+
+A portion of the engagement is trivially parallel: we are required to work on
+multiple programs over the duration of the engagement.  Even if analysing a
+problem were inherently sequential, offering no opportunities for parallelism,
+we'd still be able to run all of the problems in parallel, subject to
+constraints on hardware or wetware.
+
+\subsection{Disjoint Pipeline Segments}
+
+%FIX add diagram
+If we examine the dataflow diagram describing CAGE as it currently exists, we
+see that there are multilpe `parallel' pipelines, where we start from the same
+artifact and end at the same artifact, but arrive there via differing sequences
+of transitions.  While this doesn't allow for the more classical variety of
+parallelism, where we produce different work products in parallel, it still
+allows us to take advantage of parallelism. First, we can check our work (one
+would assume that two independent solvers producing the same solution would make
+us more confident in that solution).  Secondly, it allows us to reduce
+wall-clock time.  Generally, one of the two of these parallel pipelines is going
+to be faster.  While we can't expect super-linear, or even linear, speedup by
+taking such an approach, faster is faster.
+
+\subsubsection{Multiple Sub-problems}
+Some of the tools in our toolchain, namely AProVE, are capable of producing
+several subproblems for us to consider while answering questions about the
+complexity of a given piece of code.  These are, in a sense, trivially
+parallel; we simply solve each subproblem in parallel.  Eventually, we may want
+to consider if there should be some information sharing between these
+subproblems, but since AProVE (or whatever tool) has defined them as separate
+problems, it seems unlikely that information sharing will buy us much here.
+
+\subsection{Algorithm Portfolios}
+Some of the tools in our toolchain, namel TcT, are extremely configurable.
+While any configuration is capable of giving the correct answer to our
+inquiry. The issue is that they can take radically different amounts of time
+doing so.  In this situation, we can choose to build an algorithm portfolio, a
+collection of algorithms each designed to solve the same problem, and run them
+either completely in parallel, or according to some schedule.  There's a large
+body of literature describing how to do this for a variety of settings.
+
+\subsection{Different Properties of Interest}
+There are a variety of properties we care about checking.  In particular, worst
+case lower bounds on runtime, upper bounds on runtime, memory consumption
+bounds, and so on.  While there's bound to be some information sharing between
+these, in terms of a shared representation of the base problem, it's hard to
+imagine that we won't be able to investigate these properties independently and
+simultaneously.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Possible Approaches}
+\subsection{One Machine, Multiple Cores}
+\subsection{Ten Homogeneous Machines}
+\subsection{Arbitrary Number of Heterogeneous Machines}
+
+\end{document}

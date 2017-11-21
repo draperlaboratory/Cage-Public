@@ -1,0 +1,17 @@
+{
+    "summaries":  [{
+        "class": "java.util.Random",
+        "methods": [
+            {
+                "name": "nextInt",
+                "descriptor": "()I",
+                "static": false,
+                "modifies": ["this"],
+                "taint": {
+                    "mustTaint": ["ret", "this"]
+                }
+            }
+        ]
+    }]
+}
+

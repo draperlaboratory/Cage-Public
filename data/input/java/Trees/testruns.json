@@ -1,0 +1,86 @@
+{
+    "jar": "Traversals.jar",
+    "runs": [
+        {
+            "id": "Trees inOrder",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Traversals.inOrder(LNode;)V",
+                    "timeout": 0
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 0
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Trees preOrder",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Traversals.preOrder(LNode;)V",
+                    "timeout": 0
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 0
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "Trees postOrder",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "avoid_expanding_type_tree": true,
+                        "default_class_init_state": "YES"
+                    },
+                    "query": "Traversals.postOrder(LNode;)V",
+                    "timeout": 0
+                }
+            },
+            "backend": {
+                "time": {
+                    "upper": {
+                        "config": {
+                            "timeout": 0
+                        },
+                        "real": "n",
+                        "expected": {
+                            "bound": "n",
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

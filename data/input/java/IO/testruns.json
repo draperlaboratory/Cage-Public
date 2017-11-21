@@ -1,0 +1,34 @@
+{
+    "jar": "IO.jar",
+    "runs": [
+        {
+            "id": "IO",
+            "frontend": {
+                "config": {
+                    "options": {
+                        "summarize_all_library_calls": true,
+                        "default_class_init_state": "YES"
+                    }
+                }
+            },
+            "backend": {
+                "time": {
+                    "real": "n",
+                    "upper": {
+                        "expected": {
+                            "bound": "n"
+                        }
+                    }
+                },
+                "space": {
+                    "upper": {
+                        "real": "1",
+                        "expected": {
+                            "bound": "1"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

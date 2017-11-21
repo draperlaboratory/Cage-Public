@@ -1,0 +1,8 @@
+(VARS x0 x1 x2 x x4 x5)
+(GOAL COMPLEXITY)
+(RULES
+
+ f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x0)))), x1, x0, S(x2), x0) -> f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x0)))), x1, x0, x2, x0)
+
+ f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x)))), x4, x, S(x5), x) -> f245_0_log_Load(java.lang.Object(Account(java.lang.Object(ARRAY(x)))), x4, x, x5, x)
+)

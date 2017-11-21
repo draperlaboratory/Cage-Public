@@ -1,0 +1,5 @@
+(VAR hd tl f)
+(RULES
+ (map f nil) -> nil
+ (map f cons(hd tl)) -> (cons(f hd) map(f tl))
+)

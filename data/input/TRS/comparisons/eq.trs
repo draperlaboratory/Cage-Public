@@ -1,0 +1,10 @@
+(COMMENT Compute Equality of two integers defined in the common way)
+(VAR x y)
+(GOAL COMPLEXITY)
+
+(RULES
+  Eq(x,x) -> True
+  Eq(x,S(x)) -> False
+  Eq(S(x),x) -> False
+  Eq(S(x), S(y)) -> Eq(x,y)
+)

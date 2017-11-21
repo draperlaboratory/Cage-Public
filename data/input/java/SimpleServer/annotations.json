@@ -1,0 +1,17 @@
+{
+
+    "summaries":[{
+	"class": "java.util.Scanner",
+	"methods": [
+	    {
+		"name": "nextLine",
+		"descriptor": "()Ljava/lang/String;"
+		"static": false,
+		"taint": {
+		    "mustTaint":["ret"]
+		},
+                "modifies": [],
+	    }
+	]
+    }]
+}

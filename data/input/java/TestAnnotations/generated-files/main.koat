@@ -1,0 +1,7 @@
+(GOAL COMPLEXITY)
+(STARTTERM (FUNCTIONSYMBOLS start))
+(VAR env i23' i20' o20' i21' o24' o1 o21' o22' i17' o16' i16' o17' i19' i18' i3' o18' o19')
+(RULES
+start(env, i23') -{0,0}> main_Load_1(1 * env, 1 * i23') :|: 0 >= 0
+main_Load_1(o1, env) -{7,6 + i23'*i3' + i3'}> main_Return_18(1 * o1, 1 * i16', 1 * i17', 1 * i18', 1 * i19', 1 * i20', 1 * o16', 1 * o17', 1 * o18', 1 * o19', 1 * o20', 1 * o21', 1 * o22', 1 * i21', 1 * i3', 1 * env) :|: 0 >= 0 && 1 * o24' >= 0 && 1 * o24' > 0 && 0 < 1 * i3' && -1 * o1 < 1 * i3' && 1 * i3' >= 0 && 1 * o24' < 1 * o1 && -1 * o24' < 1 * i23' && 1 * i23' >= 0 && 1 * i3' < 1 * o1 && 1 * i23' < 1 * o24'
+)

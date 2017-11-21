@@ -1,0 +1,9 @@
+{
+    "name" : "sort",
+    "varNames" : ["l"],
+    "isPure" : true,
+    "secureArgs" : [],
+    "runTime" : "l^2",
+    "runSpace" : "1",
+    "outputSize" : "l"
+}

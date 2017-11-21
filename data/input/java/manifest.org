@@ -1,0 +1,144 @@
+* Termination Competition Input
+** AProVE_10
+   14 jars of unknown complexity
+** Aprove_09
+   76 jars of unknown complexity
+** Julia_10_Iterative
+   15 jars of unknown complexity
+** Julia_10_Recursive
+   20 jars of unknown complexity
+** Costa_Julia_09
+   29 jars of unknown complexity
+** Costa_Julia_09-recursive
+   19 jars of unknown complexity
+
+
+* Known Complexity Examples
+** Uncategorized
+
+** Non-terminating
+*** ListTest
+**** CircularList
+*** loop
+*** OddExceptions
+*** NonTerm
+** Constant
+*** ListTest
+**** SingleEl
+*** helloWorld
+*** stringCompare
+**** TestInt
+**** TestString
+** O(log n)
+*** countOnes
+** O(n)
+*** account
+*** ListTest
+*** login
+*** loginFixed
+*** loopAsRecursion
+*** squaring
+**** MultipleInsertsLinear
+*** largest
+*** fibonacci
+*** Trees
+**** InOrder
+**** PostOrder
+**** PreOrder
+**** Traversals
+** O(n log n)
+*** LCM
+*** GCD
+**** GCD
+**** GCDError
+**** GCDLoop
+**** StaticGCD
+*** PrimalityTests
+**** Eratosthenes
+**** TrialDivision
+**** TrialDivisionLoops
+** O(Polynomial)
+*** ListTest
+**** MultipleInserts
+*** RodCutting
+**** RodCuttingDyn
+*** MatrixChainMultOrder
+*** hash
+*** hashIterative
+*** PythagTriples
+**** PythagTriples
+**** PythagTriplesSlow
+*** ArraySorting
+**** InsertionSort
+**** SelectionSort
+**** BubbleSort
+**** BucketSort
+**** CombSort
+**** ShellSort
+*** genericSort
+**** CharArrayBubble
+**** CharListInsertion
+**** IntArrayShell
+**** CharArrayComb
+**** CharListSelection
+**** IntListBubble
+**** CharArrayInsertion
+**** CharListShell
+**** IntListComb
+**** CharArraySelection
+**** IntArrayBubble
+**** IntListInsertion
+**** CharArrayShell
+**** IntArrayComb
+**** IntListSelection
+**** CharListBubble
+**** IntArrayInsertion
+**** IntListShell
+**** CharListComb
+**** IntArraySelection
+** O(2^n)
+*** recursiveFib
+** O(b^d)
+*** GenericPathFinding
+**** BreadthFirstBiLine
+**** BreadthFirstLadder
+**** BreadthFirstLine
+**** BreadthFirstPancake
+*** RodCutting
+**** RodCuttingRec
+*** sudoku
+
+
+* Secret Leaking
+** AddSecret
+** SecretRand
+** LogSecret
+** EvenSecret
+*** EvenSecret
+*** EvenSecret2
+** PrimeLeak
+** infLeak
+*** InfLeak
+*** InfLeak2
+** OddSecret
+*** OddSecret
+*** OddSecret2
+** FixedSuppliedSeed
+** loginIterative
+*** InfLeakIter
+*** InfLeakIter2
+
+** BadHash
+* By Java Feature
+** Static Methods
+** Static Fields
+** Abstract Classes
+** Interfaces
+** Generics
+** Threads
+** Inheritance
+** Swing Based UI (anything not CLI honestly)
+** Marshalling
+** Reflection
+** Integer Parsing
+** Random Numbers

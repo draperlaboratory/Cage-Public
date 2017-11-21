@@ -1,0 +1,53 @@
+* Installation / Building
+** Dependencies
+   There are three major dependencies that aprove invoker has, each in the form of
+   a jar that must be linked against.  ant.settings describes three strings which
+   must be set, pointing at each of the three jars
+*** Interproc Flow
+    In house tool for determining information flow across branches
+*** Soot
+    Soot java analysis framework
+*** json-simple
+    google's library for parsing json objects in java
+* Invocation
+** Flags
+*** rt-loc
+    overrides rt.jar path from default (JAVA_HOME/jre/lib/rt.jar)
+*** jsse-loc
+    overrides jsse.jar path from default (JAVA_HOME/jre/lib/jsse.jar)
+*** jce-loc
+    overrides jce.jar path from default (JAVA_HOME/jre/lib/jce.jar)
+*** jar-loc
+    Location of the jar to be analyzed
+*** aprove-loc
+    Where does the aprove jar live. 
+    Overrides default of APROVE_HOME/dist/lib/aprove.jar
+*** java-home
+    Where does java (7) live.  Overrides the environment variable
+    JAVA_HOME
+*** out-dir
+    Where should we place output from AProve.  defaults to .
+
+*** aprove-args
+    Comma delimited list of arguments to aprove.  See aprove's documentation
+    for a complete list of available flags
+
+** Example invocations
+#!/bin/bash
+
+java -jar AproveInvoker.jar \
+     -cp /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/rt.jar:Fib.jar \
+     -p wjtp.aprove_invoker jar-loc:./Fib.jar \
+     -p wjtp.aprove_invoker out-dir:/var/tmp/ \
+     -p wjtp.aprove_invoker aprove-loc:/home/jthayer/stac/aprove/dist/lib/aprove.jar \
+     -p wjtp.aprove_invoker java-home:/usr/lib/jvm/java-7-openjdk-amd64/ \
+     Fib
+
+* What it does
+  Aprove Invoker crawls over the call graph of a given java program,
+  invoking the aprove analysis tool on each method in the call graph.
+  
+  Aprove invoker converts the call graph into a tree using standard
+  breadth first search techniques.  Then, aprove is invoked on each
+  method, starting with the leaves and working back towards the root
+  (the entry point of the program).

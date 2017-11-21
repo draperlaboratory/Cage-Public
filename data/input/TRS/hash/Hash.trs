@@ -1,0 +1,18 @@
+(VAR x y xs ys t1 t2 t3)
+(GOAL COMPLEXITY)
+(RULES
+ 
+ append(x, nil) -> cons(x, nil)
+ append(x, cons(y, ys)) -> cons(y, append(x, ys))
+
+ insert(cons(x, xs), t1, t2, t3) -> ins1(x, xs, hash(x), t1, t2, t3)
+
+ ins1(x, xs, a, t1, t2, t3) -> insert(xs, append(x, t1), t2, t3)
+ ins1(x, xs, b, t1, t2, t3) -> insert(xs, t1, append(x, t2), t3)
+ ins1(x, xs, c, t1, t2, t3) -> insert(xs, t1, t2, append(x, t3))
+
+ hash(x) -> a
+ hash(x) -> b
+ hash(x) -> c
+
+)

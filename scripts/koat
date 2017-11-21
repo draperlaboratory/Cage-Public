@@ -1,0 +1,8 @@
+#!/bin/bash
+
+koatBin=koat.native
+
+echo "koat $@" >> /var/tmp/koatInvocations
+cp $3 /var/tmp/
+ulimit -t 900 $koatBin $@
+

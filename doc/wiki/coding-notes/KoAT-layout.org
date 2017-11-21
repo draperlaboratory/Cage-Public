@@ -1,0 +1,44 @@
+* Directory Layour
+** kittel-koat-master
+   Where the entry points to the programs kittel and koat live.
+   koat.ml is the bit of source we really care about at this level
+
+*** cintprocs
+    More solving strategies specialized on cint representations
+
+*** common-procs
+    More solving strategies.
+
+*** cprocs
+    More interpretations for rewrite systems.
+    The distinguishing bit between procs and cprocs is the underlying
+    systems that they can run on.  ParaPolys vs. CTRS
+
+*** ints
+    expexp.ml exponetial expressions
+    parapoly.ml describes parametric polynomials
+    poly.ml describes polynomials
+    pc.ml describes inequality constraints
+
+*** procs
+    rules for making decisions about things
+    find polynomial interpretations, decide relative sizes, etc etc.
+
+*** simple
+    One of the ASTs that lives inside of KoAT.  Binary Expressions, Polynomials
+    and so on.  There are mll, mly files used for automatically generating the
+    parser for the AST.
+
+*** smt
+    As it says on the tin, here's where our interface to the smt solver lives.
+
+*** terms
+    More problem representation code.  Rules, massaging, getting bits and
+    pieces.  Parsers live here as well.
+
+*** utils
+    Here are the representations that we're likely to share.
+    LocalSizeComplexity and GlobalSizeComplexity, as well as complexity, all
+    discuss the elements that you'd expect them to discuss based on their names.
+
+    rvgraph is the results value graph from alternating size and runtime paper.

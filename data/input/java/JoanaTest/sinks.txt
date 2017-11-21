@@ -1,0 +1,2 @@
+A.<init>()V
+A.run()V

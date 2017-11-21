@@ -1,0 +1,12 @@
+We aren't drawing contained classes in any useful way.  That is, when another
+class is defined within the scope of some outter class, like a private action
+listener for a button or something.  That's probably useful information to have,
+and we don't render it.
+
+public, private, protected, and static properties are tracked, but not rendered
+in any meaningful way.
+
+implicit inheritances (e.g. java.lang.object) aren't tracked or rendered. Maybe
+they should be.
+
+Interfaces are ingested, but not rendered any differently than classes

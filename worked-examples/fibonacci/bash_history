@@ -1,0 +1,4 @@
+aprove Fib.jar
+cp /var/tmp/aprove8320210654587508138.koat
+koat.native Fib.koat
+detectLeak --its Fib.koat --annot Fib.annot
